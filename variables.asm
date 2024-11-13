@@ -12,4 +12,5 @@ section .data
     estado_partida db 0 ; 0 si la partida continua, 1 si no
 
 section .bss
+    partida_actual      times 49 resb 1
     partida_guardada    times 49 resb 1
