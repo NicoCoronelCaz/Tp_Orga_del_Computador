@@ -20,3 +20,6 @@ section     .data
     msg_esta_seguro      db "¿Esta seguro que desea guardar la partida actual? Perdera cualquier partida guardada anteriormente (S/N): ",10,0
     msg_final_partida    db "La partida ha finalizado, nos vemos en el siguiente Asalto",10,0
     msg_invalido         db "Opcion invalida, ingrese una opcion valida",10,0
+    msg_soldados_ganan      db "Fin de partida. Ganan los soldados", 10, 0
+    msg_oficiales_ganan     db "Fin de partida. Ganan los oficiales",10, 0
+    msg_partida_continua       db "La partida continua",10,0

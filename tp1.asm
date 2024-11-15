@@ -5,6 +5,7 @@
 %include "funciones_de_c.asm"
 %include "constantes.asm"
 %include "variables.asm"
+%include "partida.asm"
 
 global main
 
@@ -24,6 +25,29 @@ main:
     ;saludo_final
     mov rdi,msg_bienvenida
     mPuts
+    procesar_input:
+        mov rdi,respuesta_usuario
+        mGets
+
+        mov     al, [respuesta_usuario]
+        cmp     al, 'S'
+        je      llamar_establecer_configuracion
+
+        cmp     al, 'N'
+        je      loop_juego 
+
+        mov     rdi, msg_invalido
+        mPuts
+        jmp     procesar_input
+
+    llamar_establecer_configuracion:
+        establecer_configuracion
+    loop_juego:
+        verificar_partida
+
+    fin_del_juego:
+        mov rdi,msg_final_partida
+        mPuts
 ; Probando imprimir con color
     mov rdi, formato_en_color_rojo   
     mov rsi, saludo      
