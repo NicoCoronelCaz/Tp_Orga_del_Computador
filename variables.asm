@@ -13,4 +13,5 @@ section .data
 
 section .bss
     partida_actual      times 49 resb 1
-    partida_guardada    times 49 resb 1
+    comando resb 1
+
