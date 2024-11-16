@@ -116,6 +116,34 @@ mover_frente:
     mov eax, [pos_actual]
     mov [tablero + eax], vacio
     ret
+
+
+    ; Validar movimiento
+    cmp byte [direccion], 'W'
+    je mover_arriba
+    cmp byte [direccion], 'S'
+    je mover_abajo
+    cmp byte [direccion], 'D'
+    je mover_derecha
+    cmp byte [direccion], 'A'
+    je mover_izquierda
+    cmp byte [direccion], 'E'
+    je mover_arriba_derecha
+    cmp byte [direccion], 'Q'
+    je mover_arriba_izquierda
+    cmp byte [direccion], 'C'
+    je mover_abajo_derecha
+    cmp byte [direccion], 'Z'
+    je mover_abajo_izquierda
+
+    ; Movimiento inválido
+    mov rdi, msg_mov_invalido
+    call printf
+    add rsp, 8
+    jmp preguntar_movimiento
+
+    ret
+
     
 main:
 	bucle_juego:
