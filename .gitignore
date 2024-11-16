@@ -1,3 +1,135 @@
 tp1
 tp1.lst
 tp1.o
+
+global		main
+extern		printf
+extern		puts
+extern		fopen
+extern		fgets
+extern		fputs
+extern		fclose
+
+section .data
+	turno_soldado db 1   ; 1 = turno del soldado, 0 turno del oficial
+	msg_fila db "Ingrese la fila del soldado (0-6): ", 0
+    msg_columna db "Ingrese la columna del soldado (0-6): ", 0
+    msg_invalido db "Posicion invalida o no contiene un soldado, intente nuevamente.", 10, 0
+
+    vacio equ 0           ; Espacio vacío
+    soldado equ 1
+    soldado_rojo equ 5
+    oficial equ 2
+    fortaleza equ 3
+    no_jugable equ 9
+
+    tablero db 33 dup(vacio)
+    ; Tablero inicial
+    db 9,9,1,1,1,9,9
+    db 9,9,1,1,1,9,9
+    db 1,1,1,1,1,1,1
+    db 1,1,1,1,1,1,1
+    db 5,5,0,0,0,5,5
+    db 9,9,0,0,2,9,9
+    db 9,9,2,0,0,9,9
+
+section .bss
+    fila resb 1
+    columna resb 1
+    pos_actual resb 1 ; Pos calculada en el tablero (fila * 7 + columna)
+    nueva_pos resb 1  ; Nueva posición
+
+section .text
+    global _start
+    extern printf, scanf
+
+_start:
+    call bucle_juego
+
+bucle_juego:
+    cmp byte [turno_soldado], 1
+    je turno_soldado
+    jne turno_oficial
+
+turno_soldado:
+    call elegir_soldado
+    add rsp, 8  ; Ajustar la pila
+    call mover_soldado
+    mov byte [turno_soldado], 0
+    jmp bucle_juego
+
+turno_oficial:
+    call mover_oficial
+    mov byte [turno_soldado], 1
+    jmp bucle_juego
+
+elegir_soldado:
+    ; Pedir fila
+    mov rdi, msg_fila
+    call printf
+    add rsp, 8
+    mov rsi, fila
+    mov rdi, "%d"
+    call scanf
+    add rsp, 8
+
+    ; Pedir columna
+    mov rdi, msg_columna
+    call printf
+    add rsp, 8
+    mov rsi, columna
+    mov rdi, "%d"
+    call scanf
+    add rsp, 8
+
+    ; Calcular posición
+    movzx eax, byte [fila]
+    imul eax, 7
+    movzx ebx, byte [columna]
+    add eax, ebx
+    mov [pos_actual], al
+
+    ; Verificar validez
+    movzx ecx, byte [pos_actual]
+    cmp byte [tablero + ecx], soldado
+    jne posicion_invalida
+    ret
+
+posicion_invalida:
+    mov rdi, msg_invalido
+    call printf
+    add rsp, 8
+    jmp elegir_soldado
+
+mover_soldado:
+    mov eax, [pos_actual]
+    call mover_frente
+    mov byte [turno_soldado], 0
+    ret
+
+mover_oficial:
+    mov byte [turno_soldado], 1
+    ret
+
+mover_frente:
+    mov [tablero + eax], soldado
+    mov eax, [pos_actual]
+    mov [tablero + eax], vacio
+    ret
+    
+main:
+	bucle_juego:
+	cmp byte[turno_soldado], 1 ;el juego empieza moviendo los soldados
+	je turnos_soldado
+	jne turno_oficiales
+
+	call elegir_soldado
+	call mover_soldado
+	mov byte[turno_soldado], 0 
+	jmp bucle_juego
+	
+	turno_oficiales:
+	call mover_oficial
+	mov byte[turno_soldado], 1
+	jmp bucle_juego
+	
