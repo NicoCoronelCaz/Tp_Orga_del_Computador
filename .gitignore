@@ -117,7 +117,20 @@ mover_frente:
     mov [tablero + eax], vacio
     ret
 
+preguntar_movimiento:
 
+    mov rdi, msg_opciones_mov
+    call printf
+    add rsp, 8
+
+
+    mov rdi, msg_seleccion_mov
+    call printf
+    add rsp, 8
+    mov rsi, direccion
+    mov rdi, "%c"
+    call scanf
+    add rsp, 8
     ; Validar movimiento
     cmp byte [direccion], 'W'
     je mover_arriba
