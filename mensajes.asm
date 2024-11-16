@@ -1,3 +1,9 @@
+%macro imprimir_mensaje 1
+    ; Macro para imprimir un mensaje definido
+    mov rdi, %1   ; Carga la dirección del mensaje en RDI
+    mPuts         ; Llama a mPuts para imprimir
+%endmacro
+
 section     .data
     msg_bienvenida db "Bienvenido a 'El Asalto', juego estrategico del siglo XIX, donde dos oficiales defienden una fortaleza contra un escuadron de 24 soldados. ",10
                 db "Objetivo: Los oficiales deben proteger la fortaleza, capturando soldados, mientras los soldados intentan ocupar toda la fortaleza.",10,10
@@ -25,5 +31,5 @@ section     .data
     msg_esta_seguro_guardar      db "¿Esta seguro que desea guardar la partida actual? Perdera cualquier partida guardada anteriormente (S/N): ",10,0
     msg_recuperar_partida db "Ha recuperado la partida correctamente",10,0
     msg_esta_seguro_recuperar     db "¿Esta seguro que desea recuperar la partida guardada? Perdera la partida actual (S/N): ",10,0
+    msg_estadisticas              db "Estadisticas de la partida...",10,0
     msg_final_partida    db "La partida ha finalizado, nos vemos en el siguiente Asalto",10,0
-
