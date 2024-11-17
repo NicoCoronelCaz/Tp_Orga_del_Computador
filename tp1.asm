@@ -7,9 +7,9 @@
 %include "variables.asm"           
 ; %include "partida_guardada.asm"     
 %include "errores.asm"              
-; %include "comandos.asm"
+%include "comandos.asm"
 %include "partida.asm"
-; %include "tablero.asm"
+%include "tablero.asm"
 %include "configuracion.asm"
 %include "movimiento.asm"
 
@@ -28,6 +28,8 @@ main:
     ret
 
 loop_juego:
+    call imprimir_tablero
+    call procesar_input
     call verificar_partida
     je loop_juego
 

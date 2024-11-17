@@ -13,7 +13,7 @@ section .text
 %endmacro
 
 establecer_configuracion:
-    procesar_input:
+    procesar_input_configuracion:
         mov rdi,respuesta_usuario
         mGets
 
@@ -26,7 +26,7 @@ establecer_configuracion:
 
         mov     rdi, msg_invalido
         mPuts
-        jmp     procesar_input
+        jmp     procesar_input_configuracion
 
     .pedir_soldado:
         mov rdi, msg_simbolos
