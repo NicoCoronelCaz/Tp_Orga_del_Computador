@@ -1,3 +1,7 @@
+section .data
+    posiciones_fortaleza db 30,31,32,37,38,39,44,45,46 ; Indice de las posiciones de la fortaleza en el tablero
+    dir_movimientos db -7, 7, -1, 1, -8, -6, 6, 8 ; Movimientos posibles que pueden realizar los oficiales
+    msg_partida_continua db "La partida continua", 10, 0
 section     .text
 oficial_tiene_mov_disponible: 
         mov rdi, 0                ; indice para recorrer las direcciones
@@ -28,7 +32,7 @@ oficial_tiene_mov_disponible:
             ret
 
 
-%macro verificar_partida 0
+verificar_partida:
     lea rbx, [tablero]        ; rbx apunta al inicio de la matriz
     mov cl, 0             
     mov rdi,0
@@ -112,53 +116,5 @@ oficial_tiene_mov_disponible:
         mov rdi, msg_partida_continua
         mPuts
         jmp fin_del_juego
-%endmacro
-
-%macro ingresar_input 2
-    mov rdi, %1
-    mPuts
-    mov rdi, %2
-    mGets
-%endmacro
-
-%macro establecer_configuracion 0
-    mov rdi, msg_simbolos
-    mPuts
-    ingresar_input msg_simboloSoldados, soldado
-
-    .procesar_simboloOficial:
-        ingresar_input msg_simboloOficiales, oficial
-        mov al,[oficial]
-        mov bl,[soldado]
-        cmp al,bl
-        jne     .procesar_turno   
-        mov     rdi, msg_invalido
-        mPuts
-        jmp .procesar_simboloOficial
-
-    .procesar_turno:
-        ingresar_input msg_turno, turno
-        mov al, [turno]
-        cmp al, 'S'
-        je .procesar_orientacion
-        cmp al, 'O'
-        je .procesar_orientacion
-        mov rdi, msg_invalido
-        mPuts
-        jmp .procesar_turno
-    
-    .procesar_orientacion:
-        ingresar_input msg_orientacion, orientacion
-        mov al, [orientacion]
-        sub al, '0'            
-        cmp     al, 1
-        jl      .orientacion_invalida
-        cmp al,4 
-        jg .orientacion_invalida
-        mov     rsi,0
-        jmp loop_juego
-    .orientacion_invalida:
-        mov rdi, msg_invalido
-        mPuts
-        jmp .procesar_orientacion    
-%endmacro
+        ; xor rax, rax
+        ; ret

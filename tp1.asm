@@ -3,54 +3,41 @@
 
 %include "mensajes.asm"
 %include "funciones_de_c.asm"
-%include "constantes.asm"
-%include "variables.asm"
+%include "constantes.asm"           
+%include "variables.asm"           
+; %include "partida_guardada.asm"     
+%include "errores.asm"              
+; %include "comandos.asm"
 %include "partida.asm"
+; %include "tablero.asm"
+%include "configuracion.asm"
+%include "movimiento.asm"
 
 global main
 
 section     .text
-    ; Formato para printf en rojo, basicamente settea la salida de la terminal en color rojo (31) y despues la settea nuevamente a su configuracion original
-    formato_en_color_rojo db 0x1B, "[1;31m%s", 0x1B, "[0m", 10, 0 
-    saludo db "Hola",0
 main:
-;Idea de como quedaria el main:
-    ;mensaje_inicial
-    ;establecer_configuracion (Aca se configuraria la partida ya sea de manera personalizada o predeterminada)
-;loop_juego:
-    ;procesar_input (Esta parte procesa el input que recibe del usuario y llama a las macros que corresponden (moverSoldado, guardarPartida, recuperarPartida, salirDelJuego, etc.))
-    ;verificar_partida (Si todavia no termino la partida, redirijo a la etiqueta 'loop_juego', si no, redirije al fin del programa)
-;fin_del_juego: (etiqueta de fin del juego)
-    ;mostrar_estadisticas
-    ;saludo_final
-    mov rdi,msg_bienvenida
-    mPuts
-    procesar_input:
-        mov rdi,respuesta_usuario
-        mGets
+    imprimir_mensaje msg_bienvenida
 
-        mov     al, [respuesta_usuario]
-        cmp     al, 'S'
-        je      llamar_establecer_configuracion
+    call establecer_configuracion
 
-        cmp     al, 'N'
-        je      loop_juego 
+    call loop_juego
 
-        mov     rdi, msg_invalido
-        mPuts
-        jmp     procesar_input
+    jmp fin_del_juego
 
-    llamar_establecer_configuracion:
-        establecer_configuracion
-    loop_juego:
-        verificar_partida
+    ret
 
-    fin_del_juego:
-        mov rdi,msg_final_partida
-        mPuts
-; Probando imprimir con color
-    mov rdi, formato_en_color_rojo   
-    mov rsi, saludo      
-    mPrintf
-ret
+loop_juego:
+    call verificar_partida
+    je loop_juego
+
+    ret
+
+fin_del_juego:
+    imprimir_mensaje msg_estadisticas
+    imprimir_mensaje msg_final_partida 
+    ; Finaliza el programa
+    mov rax, 60       
+    xor rdi, rdi      
+    syscall           
 
