@@ -72,13 +72,13 @@ establecer_configuracion:
 
 orientar_movimientos:
     mov al, [orientacion]
-    cmp al, 1
+    cmp al, '1'
     je loop_juego
-    cmp al, 2
+    cmp al, '2'
     je rota_90_grados
-    cmp al,3
+    cmp al, '3'
     je rota_180_grados
-    cmp al, 4
+    cmp al, '4'
     je rota_270_grados
     ret
 
