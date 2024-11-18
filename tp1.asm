@@ -5,7 +5,7 @@
 %include "funciones_de_c.asm"
 %include "constantes.asm"           
 %include "variables.asm"           
-; %include "partida_guardada.asm"     
+%include "partida_guardada.asm"     
 %include "errores.asm"              
 %include "comandos.asm"
 %include "partida.asm"
