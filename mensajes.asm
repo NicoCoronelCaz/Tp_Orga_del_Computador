@@ -11,7 +11,7 @@ section     .data
                 db "1. Guardar: Puedes guardar la partida actual ingresando 'G'",10
                 db "2. Recuperar: Puedes recuperar la partida guardada ingresando 'R'",10
                 db "3. Salir: Puedes salir del juego ingresando 'S'",10
-                db "4. Mover: Puedes realizar un movimiento de alguna de las piezas del equipo en turno",10,10
+                db "4. Mover: Puedes realizar un movimiento de alguna de las piezas del equipo en turno ingresando 'M'",10,10
                 db "OPCIONES DE CONFIGURACION:",10
                 db "1. Configuracion predeterminada: Comenzar el juego con las reglas y disposicion clasica.",10
                 db "2. Configuracion personalizada: Puedes elegir simbolos para los oficiales y soldados, cambiar la orientacion del tablero y seleccionar quien comienza.",10,10
