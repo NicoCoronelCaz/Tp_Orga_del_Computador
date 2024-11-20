@@ -54,21 +54,22 @@ verificar_partida:
     jl .ganaron_oficiales ;la cantidad de soldados es menor a 9
 
     ;Verifica si la fortaleza está ocupada por los soldados, si es asi ganan los soldados sino continua verificando la partida
-    mov rcx, 0 ; contador para las posiciones de la fortaleza
-    mov ax, 0  ; cantidad de posiciones ocupadas por soldados
-    mov rdi, posiciones_fortaleza 
     .verificar_fortaleza:
-        movzx rdx, byte [rdi + rcx] ; cargar el índice de la fortaleza en rdx
-        add rdx, tablero                ; accede a la posicion rdi+rcx de la matriz
-        mov dl, [rdx]               
-        cmp dl, 'X'                 
-        jne .verificar_oficiales ; si no es soldado, pasa a verificar los oficiales
-        inc ax                     ; suma al contador de soldados en fortaleza
-        inc rcx                     ; siguiente posición en fortaleza
-        cmp rcx, 9                  ; chequea que no se sobrepase de los nueve elementos de la fortaleza
-        jne .verificar_fortaleza
-    cmp ax, 9  ; Si ax es igual a 9, todos los puntos están ocupados por soldados
-    je .ganaron_soldados
+        mov rcx, 0 ; contador para las posiciones de la fortaleza
+        mov ax, 0  ; cantidad de posiciones ocupadas por soldados
+        mov rdi, posiciones_fortaleza 
+        .verificar_soldados_en_fortaleza:
+            movzx rdx, byte [rdi + rcx] ; cargar el índice de la fortaleza en rdx
+            add rdx, tablero                ; accede a la posicion rdi+rcx de la matriz
+            mov dl, [rdx]               
+            cmp dl, 'X'                 
+            jne .verificar_oficiales ; si no es soldado, pasa a verificar los oficiales
+            inc ax                     ; suma al contador de soldados en fortaleza
+            inc rcx                     ; siguiente posición en fortaleza
+            cmp rcx, 9                  ; chequea que no se sobrepase de los nueve elementos de la fortaleza
+            jne .verificar_soldados_en_fortaleza
+        cmp ax, 9  ; Si ax es igual a 9, todos los puntos están ocupados por soldados
+        je .ganaron_soldados
     
     ;Verifica si los oficiales estan encerrados, si es asi ganan los soldados, sino la partida continua
     .verificar_oficiales:
