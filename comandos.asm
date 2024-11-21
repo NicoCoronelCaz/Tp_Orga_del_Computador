@@ -118,34 +118,34 @@ section     .bss
     je %%es_oficial
 
     %%es_soldado:
-        cmp %1, [movimiento_abajo]
+        cmp %1, 'A'
         je %%valido
-        cmp %1, [movimiento_derecha]
+        cmp %1, 'S'
         je %%valido
-        cmp %1, [movimiento_izquierda]
+        cmp %1, 'D'
         je %%valido
-        cmp %1, [movimiento_abajo_izquierda]
+        cmp %1, 'Z'
         je %%valido
-        cmp %1, [movimiento_abajo_derecha]
+        cmp %1, 'D'
         je %%valido
         jmp %%invalido
 
     %%es_oficial:
-        cmp %1, [movimiento_abajo]
+        cmp %1, 'Q'
         je %%valido
-        cmp %1, [movimiento_derecha]
+        cmp %1, 'W'
         je %%valido
-        cmp %1, [movimiento_izquierda]
+        cmp %1, 'E'
         je %%valido
-        cmp %1, [movimiento_abajo_izquierda]
+        cmp %1, 'A'
         je %%valido
-        cmp %1, [movimiento_abajo_derecha]
+        cmp %1, 'S'
         je %%valido
-        cmp %1, [movimiento_arriba]
+        cmp %1, 'D'
         je %%valido
-        cmp %1, [movimiento_arriba_derecha]
+        cmp %1, 'Z'
         je %%valido
-        cmp %1, [movimiento_arriba_izquierda]
+        cmp %1, 'C'
         je %%valido
         jmp %%invalido
 
