@@ -12,6 +12,7 @@ section     .data
     MSG_ERROR_POSICION_FINAL   db "La posición a la que se quiere mover esta fuera del tablero", 0
     MSG_ERROR_POSICION_OCUPADA db "La posición a la que se quiere mover esta ocupada", 0
     MSG_ERROR_NO_HAY_SOLDADO   db "La posicion que ingreso no tiene un soldado, recuerde que debe ingresar las coordenadas del soldado que quiere mover", 0
+    MSG_ERROR_SOLDADO_LATERAL   db "Un soldado que no esta en la seccion de color rojo, no puede moverse lateralmente", 0
     MSG_ERROR_MOVIMIENTO       db "El movimiento ingresado es inválido, leer los movimientos posibles para las piezas", 0
     MSG_COORDENADA_HORIZONTAL  db "Ingrese la coordenada horizontal: ", 0
     MSG_COORDENADA_VERTICAL    db "Ingrese la coordenada vertical: ", 0
@@ -24,11 +25,12 @@ section     .data
     COMANDO_SALIR              db "S", 0
 
     ; Constantes del juego
-    POSICIONES_VALIDAS     db 2,3,4,9,10,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,37,38,39,44,45,46
-    CANTIDAD_FILAS         db 7
-    SOLDADO_PREDETERMINADO db 'X'
-    OFICIAL_PREDETERMINADO db 'O'
-    ESPACIO_VACIO          db '-'
+    POSICIONES_VALIDAS         db 2,3,4,9,10,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,37,38,39,44,45,46
+    POSICIONES_SOLDADO_LATERAL db 28,29,33,34
+    CANTIDAD_FILAS             db 7
+    SOLDADO_PREDETERMINADO     db 'X'
+    OFICIAL_PREDETERMINADO     db 'O'
+    ESPACIO_VACIO              db '-'
 
     ; Variables del juego
     desplazamiento         db 0
@@ -118,40 +120,34 @@ section     .bss
     je %%es_oficial
 
     %%es_soldado:
-        cmp %1, 'Q'
+        cmp %1, [movimiento_abajo]
         je %%valido
-        cmp %1, 'W'
+        cmp %1, [movimiento_abajo_derecha]
         je %%valido
-        cmp %1, 'E'
+        cmp %1, [movimiento_abajo_izquierda]
         je %%valido
-        cmp %1, 'A'
+        cmp %1, [movimiento_derecha]
         je %%valido
-        cmp %1, 'S'
-        je %%valido
-        cmp %1, 'D'
-        je %%valido
-        cmp %1, 'Z'
-        je %%valido
-        cmp %1, 'C'
+        cmp %1, [movimiento_izquierda]
         je %%valido
         jmp %%invalido
 
     %%es_oficial:
-        cmp %1, 'Q'
+        cmp %1, [movimiento_abajo]
         je %%valido
-        cmp %1, 'W'
+        cmp %1, [movimiento_abajo_derecha]
         je %%valido
-        cmp %1, 'E'
+        cmp %1, [movimiento_abajo_izquierda]
         je %%valido
-        cmp %1, 'A'
+        cmp %1, [movimiento_derecha]
         je %%valido
-        cmp %1, 'S'
+        cmp %1, [movimiento_izquierda]
         je %%valido
-        cmp %1, 'D'
+        cmp %1, [movimiento_arriba]
         je %%valido
-        cmp %1, 'Z'
+        cmp %1, [movimiento_arriba_derecha]
         je %%valido
-        cmp %1, 'C'
+        cmp %1, [movimiento_arriba_izquierda]
         je %%valido
         jmp %%invalido
 
@@ -278,6 +274,43 @@ section     .bss
     mov bl, [%2]
     movzx rbx, bl
     mov [tablero+rbx], al 
+%endmacro
+
+%macro es_soldado_lateral 1
+    ; Verificar si la posición está en la lista de posiciones válidas
+    mov     al, [%1]                ; Cargar la posición a verificar en el registro al
+    mov     rsi, POSICIONES_SOLDADO_LATERAL   ; Cargar la dirección de la lista de posiciones laterales
+    mov     rcx, 4             ; Número de elementos en la lista (en este caso 33)
+
+    %%buscar_posicion_valida:
+        cmp     al, [rsi]             ; Comparar la posición con el valor en la lista
+        je      %%posicion_valida      ; Si son iguales, la posición es válida, salta a la etiqueta de fin
+
+        inc     rsi                   ; Avanzar al siguiente valor en la lista
+        loop    %%buscar_posicion_valida ; Repetir hasta que se haya comprobado toda la lista
+
+        ; Si no se encontró la posición en la lista, es inválida
+        jmp     %%posicion_invalida    ; Salta a la sección de error
+
+    %%posicion_valida:
+        ; Si la posicion es valida, settea el ZF=0
+        mov rax, 1
+        cmp rax, 0
+        jmp     %%fin                  ; Si la posiciOn es válida, termina la macro
+
+    %%posicion_invalida:
+        ; Si la posicion es invalida, settea el ZF=1
+        mov rax, 0
+        cmp rax, 0
+    %%fin:
+%endmacro
+
+%macro intercambiar_valores 2
+    mov al, [%1]
+    mov bl, [%2]
+
+    mov [%1], bl
+    mov [%2], al
 %endmacro
 
 %macro leer_input 0
@@ -424,6 +457,20 @@ mover_pieza:
     mov al, [input_numerico] ; Paso la coordenada horizontal a un registro para poder almacenarla en una variable
     mov [coordenada_horizontal], al ; Almaceno la coordenada horizontal en la variable correspondiente
 
+    mov al, '2' ; Verifico si el tablero esta rotado 90 grados para calibrar las coordenadas
+    cmp al, [orientacion]
+    je .intercambiar_coordenadas
+
+    mov al, '4' ; Verifico si el tablero esta rotado 270 grados para calibrar las coordenadas
+    cmp al, [orientacion]
+    je .intercambiar_coordenadas
+
+    jmp .continua
+
+    .intercambiar_coordenadas:
+        intercambiar_valores coordenada_horizontal, coordenada_vertical
+    .continua:
+
     calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_inicial ; Calculo el desplazamiento del tablero para llegar al elemento que quiero
 
     es_posicion_invalida posicion_inicial ; Veo si la posicion es invalida
@@ -467,12 +514,26 @@ mover_soldado:
 
     verificar_elemento_en_posicion SOLDADO_PREDETERMINADO, posicion_inicial ; Veo si la posicion tiene un soldado
 
-    jne .imprimir_error_no_hay_soldado
+    jne .imprimir_error_no_hay_soldado ; Imprimo error si no hay soldado
+
+    es_soldado_lateral posicion_inicial ; Veo si es soldado lateral
+
+    je .no_es_soldado_lateral ; Si no es, analizo si el movimiento ingresado es lateral
+    jmp .continua ; Si es, continuo
+
+    .no_es_soldado_lateral:
+        mov al, [input]
+        cmp al, [movimiento_derecha]
+        je .imprimir_error_soldado_lateral
+        cmp al, [movimiento_izquierda]
+        je .imprimir_error_soldado_lateral ; Imprimo erros si el soldado no es lateral y quiere hacer un movimiento lateral
+
+    .continua:
 
     mov al, [input]
-    actualizar_coordenadas al
+    actualizar_coordenadas al ; Calculo las coordenadas aplicando el movimiento
 
-    calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_final
+    calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_final ; Calculo la posicion con las coordenadas actualizadas
 
     es_posicion_invalida posicion_final ; Veo si la posicion es invalida
 
@@ -486,6 +547,8 @@ mover_soldado:
 
     ocupar_posicion_tablero ESPACIO_VACIO, posicion_inicial ; Dejo vacia la posicion de la que se movio el soldado
 
+    mov byte[turno], 'O' ; Si movi el soldado exitosamente, pasa a ser turno de los oficiales
+
     jmp .fin
 
     .imprimir_error_posicion:
@@ -496,6 +559,9 @@ mover_soldado:
         jmp .fin
     .imprimir_error_no_hay_soldado:
         imprimir_error MSG_ERROR_NO_HAY_SOLDADO, procesar_input
+        jmp .fin
+    .imprimir_error_soldado_lateral:
+        imprimir_error MSG_ERROR_SOLDADO_LATERAL, procesar_input
         jmp .fin
     .fin:
     ret
@@ -508,7 +574,10 @@ mover_oficial:
     ; Si esta vacia
     ; Si esta ocupada por un soldado, calculo la posicion a ocupar nuevamente.
     ; Imprimo error si sale del tablero
-    ; Si la posicion esta vacia, capturo el soldado, modifico la posicion del oficial y aumento en 1 las capturas y los movimientos 
+    ; Si la posicion esta vacia, capturo el soldado, modifico la posicion del oficial y aumento en 1 las capturas y los movimientos
+
+    mov byte[turno], 'S' ; Si movi el soldado exitosamente, pasa a ser turno de los oficiales
+    .fin: 
     ret
     
 salir_del_juego:
