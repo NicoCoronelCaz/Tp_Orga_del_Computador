@@ -114,8 +114,8 @@ verificar_partida:
         mPuts
         jmp fin_del_juego
     .sigue_partida: ;temporal porque si redirijo a loop_juego entro en bucle
-        mov rdi, msg_partida_continua
-        mPuts
-        jmp fin_del_juego
-        ; xor rax, rax
-        ; ret
+        ; mov rdi, msg_partida_continua
+        ; mPuts
+        ; jmp fin_del_juego
+        xor rax, rax
+        ret
