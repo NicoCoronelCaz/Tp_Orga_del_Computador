@@ -81,20 +81,17 @@ orientar_movimientos:
     cmp al, '4'
     je rota_270_grados
     ret
-
 rota_90_grados:
-    mov rdi, msg_configuracion
-    mPuts
-    ; Arriba -> Derecha, Abajo -> Izquierda, Derecha -> Abajo, Izquierda -> Arriba
-    mov byte [movimiento_arriba], 'D'
-    mov byte [movimiento_abajo], 'A'
-    mov byte [movimiento_derecha], 'S'
-    mov byte [movimiento_izquierda], 'W'
+    ; Arriba -> Izquierda, Abajo -> Derecha, Derecha -> Arriba, Izquierda -> Abajo
+    mov byte [movimiento_arriba], 'A'
+    mov byte [movimiento_abajo], 'D'
+    mov byte [movimiento_derecha], 'W'
+    mov byte [movimiento_izquierda], 'S'
     ; Diagonales
-    mov byte [movimiento_arriba_derecha], 'C'
-    mov byte [movimiento_arriba_izquierda], 'E'
-    mov byte [movimiento_abajo_derecha], 'Z'
-    mov byte [movimiento_abajo_izquierda], 'Q'
+    mov byte [movimiento_arriba_derecha], 'Q'
+    mov byte [movimiento_arriba_izquierda], 'Z'
+    mov byte [movimiento_abajo_derecha], 'E'
+    mov byte [movimiento_abajo_izquierda], 'C'
     jmp loop_juego
 
 rota_180_grados:
@@ -110,16 +107,17 @@ rota_180_grados:
     mov byte [movimiento_abajo_izquierda], 'E'
     jmp loop_juego
 
-
 rota_270_grados:
-    ; Arriba -> Izquierda, Abajo -> Derecha, Derecha -> Arriba, Izquierda -> Abajo
-    mov byte [movimiento_arriba], 'A'
-    mov byte [movimiento_abajo], 'D'
-    mov byte [movimiento_derecha], 'W'
-    mov byte [movimiento_izquierda], 'S'
+    mov rdi, msg_configuracion
+    mPuts
+    ; Arriba -> Derecha, Abajo -> Izquierda, Derecha -> Abajo, Izquierda -> Arriba
+    mov byte [movimiento_arriba], 'D'
+    mov byte [movimiento_abajo], 'A'
+    mov byte [movimiento_derecha], 'S'
+    mov byte [movimiento_izquierda], 'W'
     ; Diagonales
-    mov byte [movimiento_arriba_derecha], 'Q'
-    mov byte [movimiento_arriba_izquierda], 'Z'
-    mov byte [movimiento_abajo_derecha], 'E'
-    mov byte [movimiento_abajo_izquierda], 'C'
+    mov byte [movimiento_arriba_derecha], 'C'
+    mov byte [movimiento_arriba_izquierda], 'E'
+    mov byte [movimiento_abajo_derecha], 'Z'
+    mov byte [movimiento_abajo_izquierda], 'Q'
     jmp loop_juego

@@ -118,6 +118,12 @@ section     .bss
     je %%es_oficial
 
     %%es_soldado:
+        cmp %1, 'Q'
+        je %%valido
+        cmp %1, 'W'
+        je %%valido
+        cmp %1, 'E'
+        je %%valido
         cmp %1, 'A'
         je %%valido
         cmp %1, 'S'
@@ -126,7 +132,7 @@ section     .bss
         je %%valido
         cmp %1, 'Z'
         je %%valido
-        cmp %1, 'D'
+        cmp %1, 'C'
         je %%valido
         jmp %%invalido
 
