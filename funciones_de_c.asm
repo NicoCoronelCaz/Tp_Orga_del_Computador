@@ -24,13 +24,13 @@ extern sscanf
 %endmacro
 
 %macro mAtoi 0
-    sub     rsp, 8             ; Alineación de la pila antes de llamar
-    call    atoi               ; Llamamos a atoi
-    add     rsp, 8             ; Restauramos la pila después de la llamada
+    sub     rsp, 8             
+    call    atoi               
+    add     rsp, 8             
 %endmacro
 
 %macro mSscanf 0
-    sub     rsp, 8             ; Alineación de la pila antes de llamar
-    call    sscanf               ; Llamamos a atoi
-    add     rsp, 8             ; Restauramos la pila después de la llamada
+    sub     rsp, 8             
+    call    sscanf             
+    add     rsp, 8            
 %endmacro

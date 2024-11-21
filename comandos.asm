@@ -8,7 +8,10 @@ section     .data
     MSG_SOLDADO                db "Redirigió a mover soldado", 0
     MSG_OFICIAL                db "Redirigió a mover oficial", 0
     MSG_ERROR_COORDENADA       db "La coordenada ingresada es inválida, recordar que debe ser un número entre 1 y 7", 0
-    MSG_ERROR_POSICION         db "La posición ingresada es inválida, las coordenadas deben estar dentro del tablero", 0
+    MSG_ERROR_POSICION_INICIAL db "La posición ingresada es inválida, las coordenadas deben estar dentro del tablero", 0
+    MSG_ERROR_POSICION_FINAL   db "La posición a la que se quiere mover esta fuera del tablero", 0
+    MSG_ERROR_POSICION_OCUPADA db "La posición a la que se quiere mover esta ocupada", 0
+    MSG_ERROR_NO_HAY_SOLDADO   db "La posicion que ingreso no tiene un soldado, recuerde que debe ingresar las coordenadas del soldado que quiere mover", 0
     MSG_ERROR_MOVIMIENTO       db "El movimiento ingresado es inválido, leer los movimientos posibles para las piezas", 0
     MSG_COORDENADA_HORIZONTAL  db "Ingrese la coordenada horizontal: ", 0
     MSG_COORDENADA_VERTICAL    db "Ingrese la coordenada vertical: ", 0
@@ -23,12 +26,16 @@ section     .data
     ; Constantes del juego
     POSICIONES_VALIDAS     db 2,3,4,9,10,11,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,37,38,39,44,45,46
     CANTIDAD_FILAS         db 7
+    SOLDADO_PREDETERMINADO db 'X'
+    OFICIAL_PREDETERMINADO db 'O'
+    ESPACIO_VACIO          db '-'
 
     ; Variables del juego
     desplazamiento         db 0
     coordenada_horizontal  db 0
     coordenada_vertical    db 0
-    posicion               db 0
+    posicion_inicial       db 0
+    posicion_final       db 0
 
 section     .bss
     ; Datos ingresados por el usuario
@@ -39,8 +46,22 @@ section     .bss
     imprimir_mensaje %1
     jmp %2
 %endmacro 
-
-%macro es_coordenada_valida 1
+%macro imprimir_turno 0
+    mov al, [turno]  
+    cmp al, 'S'       
+    je %%imprimir_soldado
+    cmp al, 'O'        
+    je %%imprimir_oficial
+    
+    %%imprimir_soldado:
+        imprimir_mensaje MSG_SOLDADO
+        jmp %%fin
+    
+    %%imprimir_oficial:
+        imprimir_mensaje MSG_OFICIAL
+    %%fin:
+%endmacro
+%macro es_coordenada_invalida 1
 
     cmp %1, 1                       
     jl %%coordenada_invalida         
@@ -131,7 +152,7 @@ section     .bss
     %%valido:
         mov rax, 1
         cmp rax, 0
-        jmp .fin
+        jmp %%fin
 
     %%invalido:
         mov rax, 0
@@ -154,8 +175,67 @@ section     .bss
     je %2                   ; Si son iguales, salta a la etiqueta proporcionada
 %endmacro
 
-%macro calcular_posicion 2
-    ; La macro recibe dos parametros: x e y
+%macro actualizar_coordenadas 1
+    
+    cmp %1, [movimiento_abajo]
+    je %%mover_abajo
+    cmp %1, [movimiento_arriba]
+    je %%mover_arriba
+    cmp %1, [movimiento_derecha]
+    je %%mover_derecha
+    cmp %1, [movimiento_izquierda]
+    je %%mover_izquierda
+    cmp %1, [movimiento_abajo_derecha]
+    je %%mover_abajo_derecha
+    cmp %1, [movimiento_abajo_izquierda]
+    je %%mover_abajo_izquierda
+    cmp %1, [movimiento_arriba_derecha]
+    je %%mover_arriba_derecha
+    cmp %1, [movimiento_arriba_izquierda]
+    je %%mover_arriba_izquierda
+    jmp %%fin
+
+    %%mover_abajo:
+        inc byte[coordenada_vertical]
+        jmp %%fin
+
+    %%mover_arriba:
+        dec byte[coordenada_vertical]
+        jmp %%fin
+
+    %%mover_derecha:
+        inc byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%mover_izquierda:
+        dec byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%mover_abajo_derecha:
+        inc byte[coordenada_vertical]
+        inc byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%mover_abajo_izquierda:
+        inc byte[coordenada_vertical]
+        dec byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%mover_arriba_derecha:
+        dec byte[coordenada_vertical]
+        inc byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%mover_arriba_izquierda:
+        dec byte[coordenada_vertical]
+        dec byte[coordenada_horizontal]
+        jmp %%fin
+
+    %%fin:
+%endmacro
+
+%macro calcular_posicion 3
+    ; La macro recibe dos parametros: x, y, posicion
     ; Al final el resultado de la operación (x-1)*7 + (y-1) se guarda en la variable posicion
     
     mov     al, byte[%1]             
@@ -168,7 +248,30 @@ section     .bss
 
     add     al, bl         
 
-    mov     [posicion], al
+    mov     [%3], al
+%endmacro
+
+%macro verificar_elemento_en_posicion 2
+    mov al, [%1]
+    mov bl, [%2]
+    movzx rbx, bl  
+    cmp al, [tablero+rbx]       
+    je %%hay_elemento
+        mov rax, 1
+        cmp rax, 0
+        jmp %%fin
+    %%hay_elemento:
+        mov rax, 0
+        cmp rax, 0
+        jmp %%fin
+    %%fin:
+%endmacro
+
+%macro ocupar_posicion_tablero 2
+    mov al, [%1]
+    mov bl, [%2]
+    movzx rbx, bl
+    mov [tablero+rbx], al 
 %endmacro
 
 %macro leer_input 0
@@ -283,21 +386,11 @@ mover_pieza:
 
     leer_input  ; Leer el input del usuario
 
-    mov al, [input]  
-    cmp al, 'S'     
-    jne procesar_input   
+    mov al, [input]  ; Preparo para comparar el input
+    cmp al, 'S'      ; Comparo con confirmacion del usuario   
+    jne procesar_input ; Si no confirma, vuelve a pedir un comando
 
-    ; Continuar con la logica de mover_pieza segun el turno
-    mov al, [turno]  
-    cmp al, 'S'       
-    je mover_soldado 
-    cmp al, 'O'        
-    je mover_oficial 
-
-    ret 
-
-mover_soldado:
-    imprimir_mensaje MSG_SOLDADO ; Imprimo mensaje que declara el turno de los soldados y explica los movimeintos posibles
+    imprimir_turno ; Imprimo si es turno de los soldados o de los oficiales
 
     imprimir_mensaje MSG_COORDENADA_VERTICAL ; Pido la coordenada vertical
     leer_input  ; Leo la coordenada vertical
@@ -305,12 +398,12 @@ mover_soldado:
     convertir_caracter_a_numero input ; Convierto la cordenada vertical en un numero
     
     mov al, [input_numerico] ; Paso la coordenada vertical a un registro para poder mandarla a una macro
-    es_coordenada_valida al  ; Veo si la coordenada vertical es valida
+    es_coordenada_invalida al  ; Veo si la coordenada vertical es valida
     
     je .imprimir_error_coordenada ; Si la coordenada vertical es invalida, imprimo el error
 
     mov al, [input_numerico] ; Paso la coordenada vertical a un registro para poder almacenarla en una variable
-    mov [coordenada_horizontal], al ; Almaceno la coordenada vertical en la variable correspondiente
+    mov [coordenada_vertical], al ; Almaceno la coordenada vertical en la variable correspondiente
 
     imprimir_mensaje MSG_COORDENADA_HORIZONTAL ; Pido la coordenada horizontal
     leer_input ; Leo la coordenada horizontal
@@ -318,16 +411,16 @@ mover_soldado:
     convertir_caracter_a_numero input ; Convierto la coordenada horizontal en un numero
 
     mov al, [input_numerico] ; Paso la coordenada horizontal a un registro para poder mandarla a una macro
-    es_coordenada_valida al  ; Veo si la coordenada horizontal es invalida
+    es_coordenada_invalida al  ; Veo si la coordenada horizontal es invalida
 
     je .imprimir_error_coordenada ; Si la coordenada horizontal es invalida, imprimo el error
 
     mov al, [input_numerico] ; Paso la coordenada horizontal a un registro para poder almacenarla en una variable
-    mov [coordenada_vertical], al ; Almaceno la coordenada horizontal en la variable correspondiente
+    mov [coordenada_horizontal], al ; Almaceno la coordenada horizontal en la variable correspondiente
 
-    calcular_posicion coordenada_horizontal, coordenada_vertical ; Calculo el desplazamiento del tablero para llegar al elemento que quiero
+    calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_inicial ; Calculo el desplazamiento del tablero para llegar al elemento que quiero
 
-    es_posicion_invalida posicion ; Veo si la posicion es invalida
+    es_posicion_invalida posicion_inicial ; Veo si la posicion es invalida
 
     je .imprimir_error_posicion ; Si la posicion es invalida, imprimo el error
 
@@ -335,10 +428,17 @@ mover_soldado:
     leer_input ; Leo el movimiento
 
     mov al, [input] ; Preparo el movimiento para mandarlo a una macro
-    mov bl, 'S' ; Preparo el tipo de pieza para mandarlo a una macro
+    mov bl, [turno] ; Preparo el tipo de pieza para mandarlo a una macro
     es_movimiento_invalido al, bl ; Veo si el movimiento ingresado es valido
 
     je .imprimir_error_movimiento ; Si el movimiento es invalido, imprimo el error
+
+    ; Continuar con la logica de mover_pieza segun el turno
+    mov al, [turno]  
+    cmp al, 'S'       
+    je mover_soldado 
+    cmp al, 'O'        
+    je mover_oficial
 
     jmp .fin
 
@@ -347,19 +447,62 @@ mover_soldado:
         jmp .fin
     
     .imprimir_error_posicion:
-        imprimir_error MSG_ERROR_POSICION, procesar_input
+        imprimir_error MSG_ERROR_POSICION_INICIAL, procesar_input
         jmp .fin
 
     .imprimir_error_movimiento:
         imprimir_error MSG_ERROR_MOVIMIENTO, procesar_input
-        jmp .fin
-
+        jmp .fin 
     .fin:
+    ret 
 
+mover_soldado:
+    imprimir_mensaje MSG_SOLDADO ; Imprimo mensaje que declara el turno de los soldados y explica los movimeintos posibles
+
+    verificar_elemento_en_posicion SOLDADO_PREDETERMINADO, posicion_inicial ; Veo si la posicion tiene un soldado
+
+    jne .imprimir_error_no_hay_soldado
+
+    mov al, [input]
+    actualizar_coordenadas al
+
+    calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_final
+
+    es_posicion_invalida posicion_final ; Veo si la posicion es invalida
+
+    je .imprimir_error_posicion ; Si la posicion es invalida, imprimo el error
+
+    verificar_elemento_en_posicion ESPACIO_VACIO, posicion_final ; Veo si la posicion a la que se movera el soldado esta vacia
+
+    jne .imprimir_error_posicion_ocupada ; Si la posicion esta ocupada, imprimo el error
+
+    ocupar_posicion_tablero SOLDADO_PREDETERMINADO, posicion_final ; Muevo el soldado a la posicion que corresponde
+
+    ocupar_posicion_tablero ESPACIO_VACIO, posicion_inicial ; Dejo vacia la posicion de la que se movio el soldado
+
+    jmp .fin
+
+    .imprimir_error_posicion:
+        imprimir_error MSG_ERROR_POSICION_FINAL, procesar_input
+        jmp .fin
+    .imprimir_error_posicion_ocupada:
+        imprimir_error MSG_ERROR_POSICION_OCUPADA, procesar_input
+        jmp .fin
+    .imprimir_error_no_hay_soldado:
+        imprimir_error MSG_ERROR_NO_HAY_SOLDADO, procesar_input
+        jmp .fin
+    .fin:
     ret
 
 mover_oficial:
     imprimir_mensaje MSG_OFICIAL
+    ; Calculo la posicion a ocupar
+    ; Imprimo error si sale del tablero
+    ; Imprimo error si hay un oficial
+    ; Si esta vacia
+    ; Si esta ocupada por un soldado, calculo la posicion a ocupar nuevamente.
+    ; Imprimo error si sale del tablero
+    ; Si la posicion esta vacia, capturo el soldado, modifico la posicion del oficial y aumento en 1 las capturas y los movimientos 
     ret
     
 salir_del_juego:
