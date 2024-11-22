@@ -12,6 +12,7 @@ section     .data
     MSG_ERROR_POSICION_FINAL   db "La posición a la que se quiere mover esta fuera del tablero", 0
     MSG_ERROR_POSICION_OCUPADA db "La posición a la que se quiere mover esta ocupada", 0
     MSG_ERROR_NO_HAY_SOLDADO   db "La posicion que ingreso no tiene un soldado, recuerde que debe ingresar las coordenadas del soldado que quiere mover", 0
+    MSG_ERROR_NO_HAY_OFICIAL   db "La posicion que ingreso no tiene un oficial, recuerde que debe ingresar las coordenadas del oficial que quiere mover", 0
     MSG_ERROR_SOLDADO_LATERAL   db "Un soldado que no esta en la seccion de color rojo, no puede moverse lateralmente", 0
     MSG_ERROR_MOVIMIENTO       db "El movimiento ingresado es inválido, leer los movimientos posibles para las piezas", 0
     MSG_COORDENADA_HORIZONTAL  db "Ingrese la coordenada horizontal: ", 0
@@ -33,11 +34,12 @@ section     .data
     ESPACIO_VACIO              db '-'
 
     ; Variables del juego
-    desplazamiento         db 0
-    coordenada_horizontal  db 0
-    coordenada_vertical    db 0
-    posicion_inicial       db 0
-    posicion_final       db 0
+    desplazamiento              db 0
+    coordenada_horizontal       db 0
+    coordenada_vertical         db 0
+    posicion_inicial            db 0
+    posicion_final              db 0
+    posicion_soldado_a_capturar db 0
 
 section     .bss
     ; Datos ingresados por el usuario
@@ -526,7 +528,7 @@ mover_soldado:
         cmp al, [movimiento_derecha]
         je .imprimir_error_soldado_lateral
         cmp al, [movimiento_izquierda]
-        je .imprimir_error_soldado_lateral ; Imprimo erros si el soldado no es lateral y quiere hacer un movimiento lateral
+        je .imprimir_error_soldado_lateral ; Imprimo error si el soldado no es lateral y quiere hacer un movimiento lateral
 
     .continua:
 
@@ -568,15 +570,106 @@ mover_soldado:
 
 mover_oficial:
     imprimir_mensaje MSG_OFICIAL
-    ; Calculo la posicion a ocupar
-    ; Imprimo error si sale del tablero
-    ; Imprimo error si hay un oficial
-    ; Si esta vacia
-    ; Si esta ocupada por un soldado, calculo la posicion a ocupar nuevamente.
-    ; Imprimo error si sale del tablero
-    ; Si la posicion esta vacia, capturo el soldado, modifico la posicion del oficial y aumento en 1 las capturas y los movimientos
 
-    mov byte[turno], 'S' ; Si movi el soldado exitosamente, pasa a ser turno de los oficiales
+    verificar_elemento_en_posicion OFICIAL_PREDETERMINADO, posicion_inicial ; Veo si la posicion tiene un oficial
+
+    jne .imprimir_error_no_hay_oficial ; Imprimo error si no hay oficial
+    mov al, [input]
+    actualizar_coordenadas al ; Calculo las coordenadas aplicando el movimiento
+
+    calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_final ; Calculo la posicion con las coordenadas actualizadas
+
+    es_posicion_invalida posicion_final ; Veo si la posicion es invalida
+
+    je .imprimir_error_posicion ; Si la posicion es invalida, imprimo el error
+
+    verificar_elemento_en_posicion ESPACIO_VACIO, posicion_final ; Veo si la posicion a la que se movera el oficial esta vacia
+
+    je .continua ; Si la posicion esta vacia, me muevo ahi.
+
+    .captura_soldado:
+        verificar_elemento_en_posicion OFICIAL_PREDETERMINADO, posicion_final ; Veo si lo que quiero saltar es un oficial
+        je .imprimir_error_posicion_ocupada ; Si quiero saltar un oficial, imprimir error
+
+        mov al, [posicion_final]
+        mov [posicion_soldado_a_capturar], al ; Me guardo la posicion en caso de que tenga que capturar el soldado
+        mov al, [input]
+        actualizar_coordenadas al ; Actualizo las coordenadas para saltar al soldado
+
+        calcular_posicion coordenada_vertical, coordenada_horizontal, posicion_final ; Calculo la posicion con las coordenadas actualizadas
+
+        es_posicion_invalida posicion_final ; Veo si la posicion es invalida
+
+        je .imprimir_error_posicion ; Si la posicion es invalida, imprimo el error
+
+        verificar_elemento_en_posicion ESPACIO_VACIO, posicion_final ; Veo si la posicion a la que se movera el oficial esta vacia
+
+        jne .imprimir_error_posicion_ocupada ; Si la posicion esta ocupada, imprimo error
+
+        ocupar_posicion_tablero ESPACIO_VACIO, posicion_soldado_a_capturar ; Si no lo esta, capturo el soldado
+
+        mov al, [primer_oficial_posicion]
+        cmp al, [posicion_inicial]
+        je .actualizar_primer_oficial ; Si era el primer oficial actualizo sus datos
+
+        mov al, [segundo_oficial_posicion]
+        cmp al, [posicion_inicial]
+        je .actualizar_segundo_oficial ; Si era el segundo oficial actualizo sus datos
+        
+        jmp .continua ; Nunca deberia llegar aca
+
+        .actualizar_primer_oficial:
+            mov al, [posicion_final]
+            mov [primer_oficial_posicion], al
+
+            inc byte[primer_oficial_capturas]
+
+            jmp .continua
+
+        .actualizar_segundo_oficial:
+            mov al, [posicion_final]
+            mov [segundo_oficial_posicion], al
+
+            inc byte[segundo_oficial_capturas]
+
+            jmp .continua
+    .continua:
+
+    ocupar_posicion_tablero OFICIAL_PREDETERMINADO, posicion_final ; Muevo el oficial a la posicion que corresponde
+
+    ocupar_posicion_tablero ESPACIO_VACIO, posicion_inicial ; Dejo vacia la posicion de la que se movio el oficial
+
+    mov al, [primer_oficial_posicion]
+    cmp al, [posicion_inicial]
+    je .actualizar_movimientos_primer_oficial ; Si era el primer oficial actualizo sus movimientos
+
+    mov al, [segundo_oficial_posicion]
+    cmp al, [posicion_inicial]
+    je .actualizar_movimientos_segundo_oficial ; Si era el segundo oficial actualizo sus movimientos
+        
+    jmp .termina ; Nunca deberia llegar aca
+
+    .actualizar_movimientos_primer_oficial:
+        inc byte[primer_oficial_movimientos]
+        jmp .termina
+
+    .actualizar_movimientos_segundo_oficial:
+        inc byte[segundo_oficial_movimientos]
+        jmp .termina
+
+    .termina:
+    mov byte[turno], 'S' ; Si movi el oficial exitosamente, pasa a ser turno de los soldados
+
+    jmp .fin
+    .imprimir_error_posicion_ocupada:
+        imprimir_error MSG_ERROR_POSICION_OCUPADA, procesar_input
+        jmp .fin
+    .imprimir_error_no_hay_oficial:
+        imprimir_error MSG_ERROR_NO_HAY_OFICIAL, procesar_input
+        jmp .fin
+    .imprimir_error_posicion:
+        imprimir_error MSG_ERROR_POSICION_FINAL, procesar_input
+        jmp .fin
     .fin: 
     ret
     

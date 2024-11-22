@@ -5,7 +5,7 @@ section .data
     segundo_oficial_posicion_guardada db 30 ; Posicion del oficial de la derecha
     segundo_oficial_capturas_guardada db 0 ; Cantidad de soldados capturados por el oficial de la derecha
     segundo_oficial_movimientos_guardada db 0 ; Cantidad de movimientos hechos por el oficial de la derecha
-    turno_guardada   db  0       ; O si es turno de los soldados, 1 si es turno de los oficiales
+    turno_guardada   db  'S'       ; S si es turno de los soldados, O si es turno de los oficiales
     
     tablero_guardado db ' ', ' ', 'X', 'X', 'X', ' ', ' '        
         db ' ', ' ', 'X', 'X', 'X', ' ', ' ' 
