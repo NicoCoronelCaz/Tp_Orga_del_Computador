@@ -111,7 +111,7 @@ recuperarPartida:
         mov qword[indiceElementoActualTablero], 0
         mov byte[cantElementosCopiadosEnFila], 0
 
-        mFgets lineaLeida, 100, [ptrArchivo]     ; ---> Titulo leido
+        mFgets lineaLeida, 100, [ptrArchivo]
         recuperarTablero:
         cmp qword[indiceElementoActualTablero], 48
         jg recuperarEstadisticas
@@ -120,26 +120,26 @@ recuperarPartida:
                 cmp byte[cantElementosCopiadosEnFila], 7
                 je leerProximaFila
 
-                mFgets elementoLeido, 2, [ptrArchivo]   ; ---> Leo elemento
+                mFgets elementoLeido, 2, [ptrArchivo]
 
                 sub rsp, 8
                 call guardarElementoEnTablero
                 add rsp, 8
                 
-                mFgets elementoLeido, 2, [ptrArchivo]   ; ---> Leo coma
+                mFgets elementoLeido, 2, [ptrArchivo]
                 inc qword[indiceElementoActualTablero]
                 inc byte[cantElementosCopiadosEnFila]
 
                 jmp recuperarTablero
 
         leerProximaFila:
-                mFgets elementoLeido, 2, [ptrArchivo]   ; ---> Leo salto de linea
+                mFgets elementoLeido, 2, [ptrArchivo]
                 mov byte[cantElementosCopiadosEnFila], 0
                 jmp recuperarTablero
 
         recuperarEstadisticas:
                 mFgets elementoLeido, 2, [ptrArchivo]
-                mFgets lineaLeida, 100, [ptrArchivo] ; ---> Titulo leido
+                mFgets lineaLeida, 100, [ptrArchivo]
                 mFgets lineaLeida, 100, [ptrArchivo]
                 mov rdi, lineaLeida
                 mov rsi, lineaDeEstadistica
@@ -148,7 +148,7 @@ recuperarPartida:
                 mov r8, primer_oficial_movimientos
                 mSscanf
 
-                mFgets lineaLeida, 100, [ptrArchivo] ; ---> Titulo leido
+                mFgets lineaLeida, 100, [ptrArchivo]
                 mFgets lineaLeida, 100, [ptrArchivo]
                 mov rdi, lineaLeida
                 mov rsi, lineaDeEstadistica
@@ -158,7 +158,7 @@ recuperarPartida:
                 mSscanf
 
         recuperarConfiguracion:
-                mFgets lineaLeida, 100, [ptrArchivo] ; ---> Titulo leido
+                mFgets lineaLeida, 100, [ptrArchivo]
                 mFgets lineaLeida, 100, [ptrArchivo]
                 mov rdi, lineaLeida
                 lea rsi, lineaDeConfig
@@ -189,7 +189,7 @@ obtenerElementoDeTablero:
         mov [elementoActualTablero], bl
         ret
 
-guardarElementoEnTablero: ; ----> aca esta el problema
+guardarElementoEnTablero:
         mov rax, tablero
         add rax, [indiceElementoActualTablero]
         imul rax, LONG_ELEMENTO
