@@ -1,8 +1,8 @@
 section     .data
     ; Mensajes
     MSG_COMANDO                db "Ingrese un comando", 0
-    MSG_GUARDAR                db "¿Está seguro que desea guardar la partida? Perderá la partida guardada anteriormente. (S/N):", 0
-    MSG_RECUPERAR              db "¿Está seguro que desea recuperar la partida guardada? Perderá el progreso de la partida actual. (S/N):", 0
+    MSG_GUARDAR                db "¿Está seguro que desea guardar la partida? (S/N):", 0
+    MSG_RECUPERAR              db "¿Está seguro que desea recuperar la partida guardada? (S/N):", 0
     MSG_MOVER                  db "¿Está seguro que desea mover una pieza? Una vez iniciada esta acción, no puede detenerse. (S/N): ", 0
     MSG_SALIR                  db "¿Está seguro que desea salir? Perderá todo su progreso. (S/N): ", 0
     MSG_SOLDADO                db "Redirigió a mover soldado", 0
@@ -344,39 +344,9 @@ guardar_partida:
     cmp al, 'S'      
     jne procesar_input  
 
-    mov al, [primer_oficial_posicion]         
-    mov [primer_oficial_posicion_guardada], al 
-
-    mov al, [primer_oficial_capturas]         
-    mov [primer_oficial_capturas_guardada], al 
-
-    mov al, [primer_oficial_movimientos]      
-    mov [primer_oficial_movimientos_guardada], al 
-
-    ; Copiar las variables del segundo oficial
-    mov al, [segundo_oficial_posicion]       
-    mov [segundo_oficial_posicion_guardada], al 
-
-    mov al, [segundo_oficial_capturas]       
-    mov [segundo_oficial_capturas_guardada], al 
-
-    mov al, [segundo_oficial_movimientos]     
-    mov [segundo_oficial_movimientos_guardada], al 
-
-    mov al, [turno]                         
-    mov [turno_guardada], al                 
-
-    mov al, [tablero]           
-    mov [tablero_guardado], al            
-
-    mov rax, 0                  
-
-    .guarda_tablero:
-        mov al, [tablero+rax]          
-        mov [tablero_guardado+rax], al            
-        inc rax
-        cmp rax, 49                               ; Cantidad de elementos en el tablero
-        jle .guarda_tablero
+    sub rsp, 8
+    call guardarPartida
+    add rsp, 8
 
     ret
 
@@ -389,36 +359,9 @@ recuperar_partida:
     cmp al, 'S'     
     jne procesar_input  
 
-    mov al, [primer_oficial_posicion_guardada]  
-    mov [primer_oficial_posicion], al         
-
-    mov al, [primer_oficial_capturas_guardada]  
-    mov [primer_oficial_capturas], al          
-
-    mov al, [primer_oficial_movimientos_guardada] 
-    mov [primer_oficial_movimientos], al       
-
-    mov al, [segundo_oficial_posicion_guardada] 
-    mov [segundo_oficial_posicion], al         
-
-    mov al, [segundo_oficial_capturas_guardada] 
-    mov [segundo_oficial_capturas], al         
-
-    mov al, [segundo_oficial_movimientos_guardada] 
-    mov [segundo_oficial_movimientos], al      
-
-    mov al, [turno_guardada]                   
-    mov [turno], al                            
-
-    mov rax, 0                  
-
-    .recupera_tablero:
-        mov al, [tablero_guardado+rax]            
-        mov [tablero+rax], al           
-        inc rax
-        cmp rax, 49                               ; Cantidad de elementos en el tablero
-        jle .recupera_tablero
-
+    sub rsp, 8
+    call recuperarPartida
+    add rsp, 8
 
     ret                                       
 

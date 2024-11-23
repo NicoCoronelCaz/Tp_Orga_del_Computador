@@ -5,13 +5,13 @@
 %include "funciones_de_c.asm"
 %include "constantes.asm"           
 %include "variables.asm"           
-%include "partida_guardada.asm"     
 %include "errores.asm"              
 %include "comandos.asm"
 %include "partida.asm"
 %include "tablero.asm"
 %include "configuracion.asm"
 %include "movimiento.asm"
+%include "guardar_recuperar_partida.asm"
 
 global main
 
