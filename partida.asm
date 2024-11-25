@@ -98,24 +98,19 @@ verificar_partida:
             mov rsi, rax  ; posición del primer oficial
             call oficial_tiene_mov_disponible
             cmp r8,1  ;si es uno es porque el oficial tiene lugar para moverse
-            je .sigue_partida ;con que no pueda moverse ya permite seguir con la partida
+            je .sigue_partida ;con que uno pueda moverse ya permite seguir con la partida
             mov rsi, rbx   ; posición del segundo oficial 
             call oficial_tiene_mov_disponible
             cmp r8,1
             je .sigue_partida
 
     .ganaron_soldados:
-        mov rdi, msg_soldados_ganan
-        mPuts
+        imprimir_mensaje msg_soldados_ganan
         jmp fin_del_juego
 
     .ganaron_oficiales:
-        mov rdi, msg_oficiales_ganan
-        mPuts
+        imprimir_mensaje msg_oficiales_ganan
         jmp fin_del_juego
-    .sigue_partida: ;temporal porque si redirijo a loop_juego entro en bucle
-        ; mov rdi, msg_partida_continua
-        ; mPuts
-        ; jmp fin_del_juego
+    .sigue_partida: 
         xor rax, rax
         ret

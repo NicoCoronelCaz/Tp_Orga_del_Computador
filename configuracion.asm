@@ -1,79 +1,99 @@
 section .data
-    msg_configuracion db "Redireccion a configuracion exitosa", 10, 0
+    msg_menu_configuracion db "CONFIGURACIÓN PERSONALIZADA", 10
+                        db "¿Qué le gustaría hacer?", 10
+                        db "1. Modificar símbolos de las piezas", 10
+                        db "2. Modificar los turnos", 10
+                        db "3. Modificar la orientación del tablero", 10, 
+                        db "4. Salir del menú configuración", 10,
+                        db "INGRESE UNA OPCIÓN:" ,0
 section .bss
     respuesta_usuario resb 1 
 
 section .text
 
 %macro ingresar_input 2
-    mov rdi, %1
-    mPuts
+    imprimir_mensaje %1
     mov rdi, %2
     mGets
 %endmacro
 
 establecer_configuracion:
-    procesar_input_configuracion:
         mov rdi,respuesta_usuario
         mGets
 
         mov     al, [respuesta_usuario]
         cmp     al, 'S'
-        je      .pedir_soldado
+        je      configuracion_personalizada
 
         cmp     al, 'N'
-        je      loop_juego 
+        je      salir_configuracion 
 
-        mov     rdi, msg_invalido
-        mPuts
-        jmp     procesar_input_configuracion
+        imprimir_mensaje msg_invalido
+        jmp     establecer_configuracion
+configuracion_personalizada:
+    ingresar_input msg_menu_configuracion, respuesta_usuario
+    mov al, [respuesta_usuario]
+    cmp al, '1'
+    je establecer_simbolos
+    cmp al, '2'
+    je establecer_turnos
+    cmp al, '3'
+    je establecer_orientacion
+    cmp al, '4'
+    je salir_configuracion
 
+establecer_simbolos:
     .pedir_soldado:
-        mov rdi, msg_simbolos
-        mPuts
+        imprimir_mensaje msg_simbolos
         ingresar_input msg_simboloSoldados, soldado
+        mov al,[soldado]
+        cmp al,'-'
+        je .pedir_soldado
+        cmp al,' '
+        je .pedir_soldado
 
     .procesar_simboloOficial:
         ingresar_input msg_simboloOficiales, oficial
         mov al,[oficial]
         mov bl,[soldado]
+        cmp al,'-'
+        je .procesar_simboloOficial
+        cmp al,' '
+        je .procesar_simboloOficial  
         cmp al,bl
-        jne     .procesar_turno   
-        mov     rdi, msg_invalido
-        mPuts
+        jne  configuracion_personalizada 
+        imprimir_mensaje msg_invalido
         jmp .procesar_simboloOficial
-
-    .procesar_turno:
-        ingresar_input msg_turno, turno
-        mov al, [turno]
-        cmp al, 'S'
-        je .procesar_orientacion
-        cmp al, 'O'
-        je .procesar_orientacion
-        mov rdi, msg_invalido
-        mPuts
-        jmp .procesar_turno
     
-    .procesar_orientacion:
-        ingresar_input msg_orientacion, orientacion
-        mov al, [orientacion]
-        sub al, '0'            
-        cmp     al, 1
-        jl      .orientacion_invalida
-        cmp al,4 
-        jg .orientacion_invalida
-        mov     rsi,0
-        jmp orientar_movimientos
+establecer_turnos:
+    ingresar_input msg_turno, turno
+    mov al, [turno]
+    cmp al, 'S'
+    je configuracion_personalizada
+    cmp al, 'O'
+    je configuracion_personalizada
+    imprimir_mensaje msg_invalido
+    jmp establecer_turnos
+
+establecer_orientacion:
+    ingresar_input msg_orientacion, orientacion
+    mov al, [orientacion]
+    sub al, '0'            
+    cmp     al, 1
+    jl      .orientacion_invalida
+    cmp al,4 
+    jg .orientacion_invalida
+    mov     rsi,0
+    jmp orientar_movimientos
     .orientacion_invalida:
-        mov rdi, msg_invalido
-        mPuts
-        jmp .procesar_orientacion    
+        imprimir_mensaje msg_invalido
+        jmp establecer_configuracion    
 
 
 orientar_movimientos:
     mov al, [orientacion]
     cmp al, '1'
-    je loop_juego
+    je salir_configuracion
     cmp al, '2'
     je rota_90_grados
     cmp al, '3'
@@ -92,7 +112,7 @@ rota_90_grados:
     mov byte [movimiento_arriba_izquierda], 'Z'
     mov byte [movimiento_abajo_derecha], 'E'
     mov byte [movimiento_abajo_izquierda], 'C'
-    jmp loop_juego
+    jmp configuracion_personalizada
 
 rota_180_grados:
     ; Arriba -> Abajo, Abajo -> Arriba, Derecha -> Izquierda, Izquierda -> Derecha
@@ -105,11 +125,9 @@ rota_180_grados:
     mov byte [movimiento_arriba_izquierda], 'C'
     mov byte [movimiento_abajo_derecha], 'Q'
     mov byte [movimiento_abajo_izquierda], 'E'
-    jmp loop_juego
+    jmp configuracion_personalizada
 
 rota_270_grados:
-    mov rdi, msg_configuracion
-    mPuts
     ; Arriba -> Derecha, Abajo -> Izquierda, Derecha -> Abajo, Izquierda -> Arriba
     mov byte [movimiento_arriba], 'D'
     mov byte [movimiento_abajo], 'A'
@@ -120,4 +138,8 @@ rota_270_grados:
     mov byte [movimiento_arriba_izquierda], 'E'
     mov byte [movimiento_abajo_derecha], 'Z'
     mov byte [movimiento_abajo_izquierda], 'Q'
-    jmp loop_juego
+    jmp configuracion_personalizada
+
+
+salir_configuracion:
+    ret

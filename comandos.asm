@@ -5,8 +5,12 @@ section     .data
     MSG_RECUPERAR              db "¿Está seguro que desea recuperar la partida guardada? (S/N):", 0
     MSG_MOVER                  db "¿Está seguro que desea mover una pieza? Una vez iniciada esta acción, no puede detenerse. (S/N): ", 0
     MSG_SALIR                  db "¿Está seguro que desea salir? Perderá todo su progreso. (S/N): ", 0
-    MSG_SOLDADO                db "Redirigió a mover soldado", 0
-    MSG_OFICIAL                db "Redirigió a mover oficial", 0
+    MSG_SOLDADO                db 0x1B, "[31m", "TURNO DE LOS SOLDADOS", 0x1B, "[0m", 10
+                                db "Solo avanzan hacia la fortaleza (recto o en diagonal)", 10 
+                                db  "En posiciones rojas, pueden moverse lateralmente. No pueden retroceder ni capturar.", 10, 0
+    MSG_OFICIAL                db 0x1B, "[32m", "TURNO DE LOS OFICIALES", 0x1B, "[0m", 10
+                                db "Pueden moverse en cualquier dirección. Capturan soldados saltando sobre ellos a un hoyo vacío.",10
+                                db "Si no capturan cuando pueden, son retirados",10, 0
     MSG_ERROR_COORDENADA       db "La coordenada ingresada es inválida, recordar que debe ser un número entre 1 y 7", 0
     MSG_ERROR_POSICION_INICIAL db "La posición ingresada es inválida, las coordenadas deben estar dentro del tablero", 0
     MSG_ERROR_POSICION_FINAL   db "La posición a la que se quiere mover esta fuera del tablero", 0
@@ -18,6 +22,7 @@ section     .data
     MSG_COORDENADA_HORIZONTAL  db "Ingrese la coordenada horizontal: ", 0
     MSG_COORDENADA_VERTICAL    db "Ingrese la coordenada vertical: ", 0
     MSG_MOVIMIENTO             db "Ingrese el movimiento que desea hacer", 0
+    
 
     ; Comandos
     COMANDO_MOVER              db "M", 0
@@ -322,6 +327,7 @@ section     .bss
 
 section .text
 procesar_input:
+    imprimir_mensaje msg_menu ; Muestro el menu de comandos
     imprimir_mensaje MSG_COMANDO ; Pido el comando
     
     leer_input ; Leo el comando ingresado
@@ -422,6 +428,7 @@ mover_pieza:
 
     je .imprimir_error_posicion ; Si la posicion es invalida, imprimo el error
 
+    imprimir_mensaje msg_movimientos_comandos ; Muestro los movimientos posibles para las piezas
     imprimir_mensaje MSG_MOVIMIENTO ; Pido el movimiento
     leer_input ; Leo el movimiento
 
@@ -455,8 +462,7 @@ mover_pieza:
     ret 
 
 mover_soldado:
-    imprimir_mensaje MSG_SOLDADO ; Imprimo mensaje que declara el turno de los soldados y explica los movimeintos posibles
-
+    
     verificar_elemento_en_posicion SOLDADO_PREDETERMINADO, posicion_inicial ; Veo si la posicion tiene un soldado
 
     jne .imprimir_error_no_hay_soldado ; Imprimo error si no hay soldado
@@ -512,8 +518,6 @@ mover_soldado:
     ret
 
 mover_oficial:
-    imprimir_mensaje MSG_OFICIAL
-
     verificar_elemento_en_posicion OFICIAL_PREDETERMINADO, posicion_inicial ; Veo si la posicion tiene un oficial
 
     jne .imprimir_error_no_hay_oficial ; Imprimo error si no hay oficial

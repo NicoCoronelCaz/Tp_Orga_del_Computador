@@ -79,6 +79,7 @@ section .bss
 section .text
 
 imprimir_tablero:
+        imprimir_mensaje msg_tablero_actual
         sub rsp, 1
         call inicializarSegunOrientacion
         add rsp, 1

@@ -20,9 +20,7 @@ main:
     imprimir_mensaje msg_bienvenida
 
     call establecer_configuracion
-
     call loop_juego
-
     jmp fin_del_juego
 
     ret
@@ -37,9 +35,29 @@ loop_juego:
 
 fin_del_juego:
     imprimir_mensaje msg_estadisticas
+    ;Estadisticas del primer oficial
+    imprimir_mensaje msg_estadisticas_oficial1
+    imprimir_mensaje msg_cantidad_capturas
+    mov rdi, primer_oficial_capturas
+    mPuts
+    imprimir_mensaje msg_cantidad_movimientos
+    mov rdi, primer_oficial_movimientos
+    mPuts
+
+    ;Estadisticas del segundo oficial
+    imprimir_mensaje msg_estadisticas_oficial2
+    imprimir_mensaje msg_cantidad_capturas
+    mov rdi, segundo_oficial_capturas
+    mPuts
+    imprimir_mensaje msg_cantidad_movimientos
+    mov rdi, segundo_oficial_movimientos
+    mPuts
+    
     imprimir_mensaje msg_final_partida 
     ; Finaliza el programa
     mov rax, 60       
     xor rdi, rdi      
     syscall           
 
+
+    
