@@ -37,6 +37,7 @@ section     .data
     SOLDADO_PREDETERMINADO     db 'X'
     OFICIAL_PREDETERMINADO     db 'O'
     ESPACIO_VACIO              db '-'
+    MOVIMIENTOS_POSIBLES       db 'Q','W','E','A','S','D','Z','C'
 
     ; Variables del juego
     desplazamiento              db 0
@@ -45,6 +46,10 @@ section     .data
     posicion_inicial            db 0
     posicion_final              db 0
     posicion_soldado_a_capturar db 0
+    posicion_posible_captura    db 0
+    existe_captura_posible      db 0 ; O si no existe, 1 si existe captura posible
+    contador                    db 0
+    dir_movimiento              db 0
 
 section     .bss
     ; Datos ingresados por el usuario
@@ -241,6 +246,61 @@ section     .bss
         jmp %%fin
 
     %%fin:
+%endmacro
+
+%macro tiene_captura_posible 1
+    ; Configurar el contador para iterar sobre los movimientos posibles
+    lea rsi, [dir_movimientos]  ; Cargar la dirección de dir_movimientos
+    mov byte[contador], 0                  ; Hay 8 movimientos posibles
+
+    %%inicio_bucle:
+        mov al, [contador] 
+        cmp al, 8                 ; Verificar si quedan movimientos
+        je %%fin1                  ; Salir del bucle si rcx es 0
+
+        mov al, [%1]
+
+        ; Calculo la posicion donde deberia estar el soldado
+        movzx rdx, byte [contador]
+        add al, [rsi+rdx]
+        mov [posicion_posible_captura], al
+
+        mov rdx, rsi              
+        es_posicion_invalida posicion_posible_captura ; Verificar si la posicion donde se capturaria es invalida
+        mov rsi, rdx              
+        je %%siguiente_direccion   ; Si no es valida, pasar a la siguiente direccion
+
+        ; Verificar si hay un soldado en la posicion
+        verificar_elemento_en_posicion SOLDADO_PREDETERMINADO, posicion_posible_captura
+        jne %%siguiente_direccion  ; Si no lo hay, pasar a la siguiente direccion
+
+        ; Actualizar las coordenadas para verificar la posicion donde se situaria el oficial luego de la captura
+        movzx rdx, byte [contador]
+        mov al, [posicion_posible_captura]
+        add al, [rsi+rdx]
+        mov [posicion_posible_captura], al
+
+        mov rdx, rsi 
+        es_posicion_invalida posicion_posible_captura ; Verificar si la posicion donde se situaria el oficial luego de la captura es invalida
+        mov rsi, rdx 
+        je %%siguiente_direccion   ; Si no es valida, pasar a la siguiente direccion
+
+        ; Verificar si la posicion donde se situaria el oficial esta vacia
+        verificar_elemento_en_posicion ESPACIO_VACIO, posicion_posible_captura
+        jne %%siguiente_direccion  ; Si no esta vacia, pasar a la siguiente direccion
+
+        ; Si llegamos aquí, se encontro una captura posible
+        mov rax, 0
+        cmp rax, 0               ; Establecer rax en 0 (captura encontrada)
+        jmp %%fin2                 ; Salir del bucle
+
+    %%siguiente_direccion:
+        inc byte[contador]          ; Decrementar el contador manualmente
+        jmp %%inicio_bucle         ; Saltar al inicio del bucle
+    %%fin1:
+    mov rax, 1
+    cmp rax, 0  ; No se encontró captura posible (por defecto)
+    %%fin2:              
 %endmacro
 
 %macro calcular_posicion 3
@@ -532,7 +592,7 @@ mover_oficial:
 
     verificar_elemento_en_posicion ESPACIO_VACIO, posicion_final ; Veo si la posicion a la que se movera el oficial esta vacia
 
-    je .continua ; Si la posicion esta vacia, me muevo ahi.
+    je .no_se_capturo; Si la posicion esta vacia, entonces no capture
 
     .captura_soldado:
         verificar_elemento_en_posicion OFICIAL_PREDETERMINADO, posicion_final ; Veo si lo que quiero saltar es un oficial
@@ -580,12 +640,41 @@ mover_oficial:
             inc byte[segundo_oficial_capturas]
 
             jmp .continua
+
+    .no_se_capturo:
+        tiene_captura_posible posicion_inicial
+        je .retirar_oficial_que_se_movio
+        
+
+        tiene_captura_posible primer_oficial_posicion
+        je .retirar_primer_oficial
+        
+
+        tiene_captura_posible segundo_oficial_posicion
+        je .retirar_segundo_oficial
+        
+    jmp .continua
+    
+    .retirar_primer_oficial:
+        ocupar_posicion_tablero ESPACIO_VACIO, primer_oficial_posicion
+        jmp .continua
+    .retirar_segundo_oficial:
+        ocupar_posicion_tablero ESPACIO_VACIO, segundo_oficial_posicion
+        jmp .continua
+
     .continua:
 
     ocupar_posicion_tablero OFICIAL_PREDETERMINADO, posicion_final ; Muevo el oficial a la posicion que corresponde
 
     ocupar_posicion_tablero ESPACIO_VACIO, posicion_inicial ; Dejo vacia la posicion de la que se movio el oficial
 
+    jmp .sigue
+
+    .retirar_oficial_que_se_movio:
+        ocupar_posicion_tablero ESPACIO_VACIO, posicion_inicial
+
+    .sigue:
+        
     mov al, [primer_oficial_posicion]
     cmp al, [posicion_inicial]
     je .actualizar_movimientos_primer_oficial ; Si era el primer oficial actualizo sus movimientos
