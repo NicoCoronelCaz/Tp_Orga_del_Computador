@@ -18,6 +18,7 @@ section     .data
     MSG_ERROR_NO_HAY_SOLDADO   db "La posicion que ingreso no tiene un soldado, recuerde que debe ingresar las coordenadas del soldado que quiere mover", 0
     MSG_ERROR_NO_HAY_OFICIAL   db "La posicion que ingreso no tiene un oficial, recuerde que debe ingresar las coordenadas del oficial que quiere mover", 0
     MSG_ERROR_SOLDADO_LATERAL   db "Un soldado que no esta en la seccion de color rojo, no puede moverse lateralmente", 0
+    MSG_ERROR_MOVIMIENTO_SOLDADO_LATERAL       db "El movimiento ingresado es inválido, los soldados en rojo pueden moverse lateralmente pero solo en direccion a la fortaleza", 0
     MSG_ERROR_MOVIMIENTO       db "El movimiento ingresado es inválido, leer los movimientos posibles para las piezas", 0
     MSG_COORDENADA_HORIZONTAL  db "Ingrese la coordenada horizontal: ", 0
     MSG_COORDENADA_VERTICAL    db "Ingrese la coordenada vertical: ", 0
@@ -54,7 +55,7 @@ section     .data
 section     .bss
     ; Datos ingresados por el usuario
     input          resb 1
-    input_numerico resb 1
+    input_numerico resb 1 
 
 %macro imprimir_error 2
     imprimir_mensaje %1
@@ -258,9 +259,14 @@ section     .bss
         cmp al, 8                 ; Verificar si quedan movimientos
         je %%fin1                  ; Salir del bucle si rcx es 0
 
+        ; Veo si hay un oficial en la posicion recibida por parametro
         mov al, [%1]
+        mov [posicion_posible_captura], al
+        verificar_elemento_en_posicion OFICIAL_PREDETERMINADO, posicion_posible_captura
+        jne %%fin1
 
         ; Calculo la posicion donde deberia estar el soldado
+        mov al, [%1]
         movzx rdx, byte [contador]
         add al, [rsi+rdx]
         mov [posicion_posible_captura], al
@@ -383,6 +389,39 @@ section     .bss
 %macro leer_input 0
     mov		rdi,input	
 	mGets
+%endmacro
+
+%macro validar_movimiento_lateral 2
+    mov al, [%1]              ; Cargar la posición actual
+    cmp al, 29                ; Comprobar si la posicion es 29
+    je %%verificar_izquierda  ; Si es 29, verificar si es movimiento a la izquierda
+
+    cmp al, 33                ; Comprobar si la posicion es 33
+    je %%verificar_derecha    ; Si es 33, verificar si es movimiento a la derecha
+
+    jmp %%fin                 ; Si no es una posicion restringida, permitir el movimiento
+
+    %%verificar_izquierda:
+        mov al, [%2]
+        cmp al, [movimiento_izquierda]           ; Verificar si es movimiento a la izquierda
+        je %%movimiento_invalido ; Si es así, el movimiento no está permitido
+        jmp %%fin
+
+    %%verificar_derecha:
+        mov al, [%2]
+        cmp al, [movimiento_derecha]          ; Verificar si es movimiento a la derecha
+        je %%movimiento_invalido ; Si es asi, el movimiento no esta permitido
+        jmp %%fin
+
+    %%movimiento_invalido:
+        mov rax, 0            ; Establecer resultado inválido
+        cmp rax, 0
+        jmp %%fin
+
+    mov rax, 1            ; Establecer resultado válido
+    cmp rax, 0
+
+    %%fin:
 %endmacro
 
 section .text
@@ -530,7 +569,7 @@ mover_soldado:
     es_soldado_lateral posicion_inicial ; Veo si es soldado lateral
 
     je .no_es_soldado_lateral ; Si no es, analizo si el movimiento ingresado es lateral
-    jmp .continua ; Si es, continuo
+    jmp .si_es_soldado_lateral ; Si es, continuo
 
     .no_es_soldado_lateral:
         mov al, [input]
@@ -538,7 +577,10 @@ mover_soldado:
         je .imprimir_error_soldado_lateral
         cmp al, [movimiento_izquierda]
         je .imprimir_error_soldado_lateral ; Imprimo error si el soldado no es lateral y quiere hacer un movimiento lateral
-
+        jmp .continua
+    .si_es_soldado_lateral:
+        validar_movimiento_lateral posicion_inicial, input
+        je .imprimir_error_movimiento_soldado_lateral
     .continua:
 
     mov al, [input]
@@ -573,6 +615,9 @@ mover_soldado:
         jmp .fin
     .imprimir_error_soldado_lateral:
         imprimir_error MSG_ERROR_SOLDADO_LATERAL, procesar_input
+        jmp .fin
+    .imprimir_error_movimiento_soldado_lateral:
+        imprimir_error MSG_ERROR_MOVIMIENTO_SOLDADO_LATERAL, procesar_input
         jmp .fin
     .fin:
     ret
@@ -654,7 +699,7 @@ mover_oficial:
         je .retirar_segundo_oficial
         
     jmp .continua
-    
+
     .retirar_primer_oficial:
         ocupar_posicion_tablero ESPACIO_VACIO, primer_oficial_posicion
         jmp .continua
