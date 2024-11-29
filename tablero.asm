@@ -40,9 +40,12 @@ section .data
         coordY1Der                db `          %i`,0
         coordY2Der                db `  %i`,0
 
-        coordenadasX1             db `    1   2   3   4   5   6   7  `,0
-        coordenadasX2             db `    7   6   5   4   3   2   1  `,0
-        coordenadasX3             db `                               `,0
+        coordenadasX1             db `    1   2   3   4   5   6   7  \n`,0
+        coordenadasX2             db `    7   6   5   4   3   2   1  \n`,0
+        coordenadasX3             db ``,0
+        coordenadasX4             db `\n`,0
+        coordenadasX5             db `    1   2   3   4   5   6   7  \n\n`,0
+        coordenadasX6             db `    7   6   5   4   3   2   1  \n\n`,0
 
         pisoAlto                  db   `          ╔═══╦═══╦═══╗        `,0
         entreFila1                db `\n          ╠═══╬═══╬═══╣        `,0
@@ -84,7 +87,8 @@ imprimir_tablero:
         call inicializarSegunOrientacion
         add rsp, 1
 
-        Puts [ptrCoordXArriba]
+        mov rdi, [ptrCoordXArriba]
+        mPrintf
         Puts pisoAlto
 
         imprimirFila:
@@ -201,7 +205,7 @@ inicializarSegunOrientacion:
         inicializarConFortalezaAbajo:
                 lea rax, [coordenadasX1]
                 mov [ptrCoordXArriba], rax
-                lea rax, [coordenadasX3]
+                lea rax, [coordenadasX4]
                 mov [ptrCoordXAbajo], rax
 
                 lea rax, [coordY1Izq]
@@ -225,7 +229,7 @@ inicializarSegunOrientacion:
         inicializarConFortalezaIzquierda:
                 lea rax, [coordenadasX2]
                 mov [ptrCoordXArriba], rax
-                lea rax, [coordenadasX3]
+                lea rax, [coordenadasX4]
                 mov [ptrCoordXAbajo], rax
 
                 lea rax, [coordY1Der]
@@ -250,7 +254,7 @@ inicializarSegunOrientacion:
         inicializarConFortalezaDerecha:
                 lea rax, [coordenadasX3]
                 mov [ptrCoordXArriba], rax
-                lea rax, [coordenadasX1]
+                lea rax, [coordenadasX5]
                 mov [ptrCoordXAbajo], rax
 
                 lea rax, [coordY1Izq]
@@ -274,7 +278,7 @@ inicializarSegunOrientacion:
         inicializarConFortalezaArriba:
                 lea rax, [coordenadasX3]
                 mov [ptrCoordXArriba], rax
-                lea rax, [coordenadasX2]
+                lea rax, [coordenadasX6]
                 mov [ptrCoordXAbajo], rax
 
                 lea rax, [coordY1Der]
@@ -544,5 +548,6 @@ verificarSoldadoRojo:
 
 finTablero:
         Puts pisoBajo
-        Puts [ptrCoordXAbajo]
+        mov rdi, [ptrCoordXAbajo]
+        mPrintf
         ret
