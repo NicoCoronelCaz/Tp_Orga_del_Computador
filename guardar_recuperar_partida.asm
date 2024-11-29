@@ -8,8 +8,8 @@ section .data
         modoLectura         db "r",0
 
         tituloTablero       db `TABLERO:\n`,0
-        tituloEstadistica1  db `ESTADISTICAS DE PRIMER OFICIAL (Posicion, Capturas, #Movimientos):\n`,0
-        tituloEstadistica2  db `ESTADISTICAS DE SEGUNDO OFICIAL (Posicion, Capturas, #Movimientos):\n`,0
+        tituloEstadistica1  db `ESTADISTICAS DE PRIMER OFICIAL (Posicion, Capturas, mov_arriba_izq, mov_arriba, mov_arriba_der, mov_izq, mov_der, mov_abajo_der, mov_abajo, mov_abajo_izq):\n`,0
+        tituloEstadistica2  db `ESTADISTICAS DE SEGUNDO OFICIAL (Posicion, Capturas, mov_arriba_izq, mov_arriba, mov_arriba_der, mov_izq, mov_der, mov_abajo_der, mov_abajo, mov_abajo_izq):\n`,0
         tituloConfig        db `CONFIGURACION DE PARTIDA (Turno, Orientacion, simbolo oficial, simbolo soldado):\n`,0
 
         formatoNumero       db "%hhi,",0
@@ -17,13 +17,14 @@ section .data
         formatoString       db "%s",0
         saltoDeLinea        db `\n`,0
 
-        lineaDeEstadistica  db `%hhi,%hhi,%hhi,`,0
+        lineaDeEstadistica1 db `%hhi,%hhi,`,0
+        lineaDeEstadistica2 db `%hhi,%hhi,%hhi,%hhi,`,0
         lineaDeConfig       db `%c,%c,%c,%c,`,0
 
 section .bss
         ptrArchivo                  resq 1
-        nombreArchivo               resb 100
-        lineaLeida                  resb 100
+        nombreArchivo               resb 500
+        lineaLeida                  resb 500
         elementoLeido               resb 1
 
         elementoActualTablero       resb 1
@@ -76,13 +77,31 @@ guardarPartida:
                 mFprintf [ptrArchivo], formatoString, tituloEstadistica1
                 mFprintf [ptrArchivo], formatoNumero, [primer_oficial_posicion]
                 mFprintf [ptrArchivo], formatoNumero, [primer_oficial_capturas]
-                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movimientos]
+                mFprintf [ptrArchivo], formatoString, saltoDeLinea
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_arriba_izq]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_arriba]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_arriba_der]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_izquierda]
+                mFprintf [ptrArchivo], formatoString, saltoDeLinea
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_derecha]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_abajo_izq]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_abajo]
+                mFprintf [ptrArchivo], formatoNumero, [primer_oficial_movs_abajo_der]
                 mFprintf [ptrArchivo], formatoString, saltoDeLinea
  
                 mFprintf [ptrArchivo], formatoString, tituloEstadistica2
                 mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_posicion]
                 mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_capturas]
-                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movimientos]
+                mFprintf [ptrArchivo], formatoString, saltoDeLinea
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_arriba_izq]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_arriba]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_arriba_der]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_izquierda]
+                mFprintf [ptrArchivo], formatoString, saltoDeLinea
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_derecha]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_abajo_izq]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_abajo]
+                mFprintf [ptrArchivo], formatoNumero, [segundo_oficial_movs_abajo_der]
                 mFprintf [ptrArchivo], formatoString, saltoDeLinea
 
         guardarConfiguracion:
@@ -111,7 +130,7 @@ recuperarPartida:
         mov qword[indiceElementoActualTablero], 0
         mov byte[cantElementosCopiadosEnFila], 0
 
-        mFgets lineaLeida, 100, [ptrArchivo]
+        mFgets lineaLeida, 500, [ptrArchivo]
         recuperarTablero:
         cmp qword[indiceElementoActualTablero], 48
         jg recuperarEstadisticas
@@ -139,27 +158,64 @@ recuperarPartida:
 
         recuperarEstadisticas:
                 mFgets elementoLeido, 2, [ptrArchivo]
-                mFgets lineaLeida, 100, [ptrArchivo]
-                mFgets lineaLeida, 100, [ptrArchivo]
+                mFgets lineaLeida, 500, [ptrArchivo]
+
+                mFgets lineaLeida, 500, [ptrArchivo]
                 mov rdi, lineaLeida
-                mov rsi, lineaDeEstadistica
+                mov rsi, lineaDeEstadistica1
                 mov rdx, primer_oficial_posicion
                 mov rcx, primer_oficial_capturas
-                mov r8, primer_oficial_movimientos
                 mSscanf
 
-                mFgets lineaLeida, 100, [ptrArchivo]
-                mFgets lineaLeida, 100, [ptrArchivo]
+                mFgets lineaLeida, 500, [ptrArchivo]
                 mov rdi, lineaLeida
-                mov rsi, lineaDeEstadistica
+                mov rsi, lineaDeEstadistica2
+                mov rdx, primer_oficial_movs_arriba_izq
+                mov rcx, primer_oficial_movs_arriba
+                mov r8, primer_oficial_movs_arriba_der
+                mov r9, primer_oficial_movs_izquierda
+                mSscanf
+
+                mFgets lineaLeida, 500, [ptrArchivo]
+                mov rdi, lineaLeida
+                mov rsi, lineaDeEstadistica2
+                mov rdx, primer_oficial_movs_derecha
+                mov rcx, primer_oficial_movs_abajo_izq
+                mov r8, primer_oficial_movs_abajo
+                mov r9, primer_oficial_movs_abajo_der
+                mSscanf
+
+                mFgets lineaLeida, 500, [ptrArchivo]
+
+                mFgets lineaLeida, 500, [ptrArchivo]
+                mov rdi, lineaLeida
+                mov rsi, lineaDeEstadistica1
                 mov rdx, segundo_oficial_posicion
                 mov rcx, segundo_oficial_capturas
-                mov r8, segundo_oficial_movimientos
+                mSscanf
+
+                mFgets lineaLeida, 500, [ptrArchivo]
+                mov rdi, lineaLeida
+                mov rsi, lineaDeEstadistica2
+                mov rdx, segundo_oficial_movs_arriba_izq
+                mov rcx, segundo_oficial_movs_arriba
+                mov r8, segundo_oficial_movs_arriba_der
+                mov r9, segundo_oficial_movs_izquierda
+                mSscanf
+
+                mFgets lineaLeida, 500, [ptrArchivo]
+                mov rdi, lineaLeida
+                mov rsi, lineaDeEstadistica2
+                mov rdx, segundo_oficial_movs_derecha
+                mov rcx, segundo_oficial_movs_abajo_izq
+                mov r8, segundo_oficial_movs_abajo
+                mov r9, segundo_oficial_movs_abajo_der
                 mSscanf
 
         recuperarConfiguracion:
-                mFgets lineaLeida, 100, [ptrArchivo]
-                mFgets lineaLeida, 100, [ptrArchivo]
+                mFgets lineaLeida, 500, [ptrArchivo]
+
+                mFgets lineaLeida, 500, [ptrArchivo]
                 mov rdi, lineaLeida
                 lea rsi, lineaDeConfig
                 mov rdx, turno

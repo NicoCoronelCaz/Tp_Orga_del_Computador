@@ -1,8 +1,6 @@
 section .data
     primer_oficial_posicion db 44 ; Posicion del oficial de la izquierda
     primer_oficial_capturas db 0 ; Cantidad de soldados capturados por el oficial de la izquierda
-    primer_oficial_movimientos db 0 ; Cantidad de movimientos hechos por el oficial de la izquierda
-
     primer_oficial_movs_abajo_izq  db 0 ; Cantidad de movimientos hacia abajo-izquierda hechos por el oficial de la izquierda
     primer_oficial_movs_abajo      db 0 ; Cantidad de movimientos hacia abajo hechos por el oficial de la izquierda
     primer_oficial_movs_abajo_der  db 0 ; Cantidad de movimientos hacia abajo-derecha hechos por el oficial de la izquierda
@@ -14,8 +12,6 @@ section .data
 
     segundo_oficial_posicion db 39 ; Posicion del oficial de la derecha
     segundo_oficial_capturas db 0 ; Cantidad de soldados capturados por el oficial de la derecha
-    segundo_oficial_movimientos db 0 ; Cantidad de movimientos hechos por el oficial de la derecha
-
     segundo_oficial_movs_abajo_izq  db 0 ; Cantidad de movimientos hacia abajo-izquierda hechos por el oficial de la derecha
     segundo_oficial_movs_abajo      db 0 ; Cantidad de movimientos hacia abajo hechos por el oficial de la derecha
     segundo_oficial_movs_abajo_der  db 0 ; Cantidad de movimientos hacia abajo-derecha hechos por el oficial de la derecha
