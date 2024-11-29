@@ -424,7 +424,7 @@ section     .bss
     %%fin:
 %endmacro
 
-%macro actualizar_estadisticas_movimiento 4
+%macro actualizar_estadisticas_movimiento 8
     mov al, [input]
     cmp al, [movimiento_abajo]
     je %%mover_abajo
@@ -434,6 +434,14 @@ section     .bss
     je %%mover_derecha
     cmp al, [movimiento_izquierda]
     je %%mover_izquierda
+    cmp al, [movimiento_abajo_izquierda]
+    je %%mover_abajo_izquierda
+    cmp al, [movimiento_abajo_derecha]
+    je %%mover_abajo_derecha
+    cmp al, [movimiento_arriba_izquierda]
+    je %%mover_arriba_izquierda
+    cmp al, [movimiento_arriba_derecha]
+    je %%mover_arriba_derecha
 
     %%mover_abajo:
         inc byte[%1]
@@ -446,6 +454,18 @@ section     .bss
         jmp .termina
     %%mover_izquierda:
         inc byte[%4]
+        jmp .termina
+    %%mover_abajo_izquierda:
+        inc byte[%5]
+        jmp .termina
+    %%mover_abajo_derecha:
+        inc byte[%6]
+        jmp .termina
+    %%mover_arriba_izquierda:
+        inc byte[%7]
+        jmp .termina
+    %%mover_arriba_derecha:
+        inc byte[%8]
         jmp .termina
 %endmacro
 section .text
@@ -755,11 +775,11 @@ mover_oficial:
     jmp .termina ; Nunca deberia llegar aca
 
     .actualizar_movimientos_primer_oficial:
-        actualizar_estadisticas_movimiento primer_oficial_movs_abajo, primer_oficial_movs_arriba, primer_oficial_movs_derecha, primer_oficial_movs_izquierda
+        actualizar_estadisticas_movimiento primer_oficial_movs_abajo, primer_oficial_movs_arriba, primer_oficial_movs_derecha, primer_oficial_movs_izquierda, primer_oficial_movs_abajo_izq, primer_oficial_movs_abajo_der, primer_oficial_movs_arriba_izq, primer_oficial_movs_arriba_der
         jmp .termina
 
     .actualizar_movimientos_segundo_oficial:
-        actualizar_estadisticas_movimiento segundo_oficial_movs_abajo, segundo_oficial_movs_arriba, segundo_oficial_movs_derecha, segundo_oficial_movs_izquierda
+        actualizar_estadisticas_movimiento segundo_oficial_movs_abajo, segundo_oficial_movs_arriba, segundo_oficial_movs_derecha, segundo_oficial_movs_izquierda, segundo_oficial_movs_abajo_izq, segundo_oficial_movs_abajo_der, segundo_oficial_movs_arriba_izq, segundo_oficial_movs_arriba_der
         jmp .termina
 
     .termina:
