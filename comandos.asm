@@ -424,6 +424,30 @@ section     .bss
     %%fin:
 %endmacro
 
+%macro actualizar_estadisticas_movimiento 4
+    mov al, [input]
+    cmp al, [movimiento_abajo]
+    je %%mover_abajo
+    cmp al, [movimiento_arriba]
+    je %%mover_arriba
+    cmp al, [movimiento_derecha]
+    je %%mover_derecha
+    cmp al, [movimiento_izquierda]
+    je %%mover_izquierda
+
+    %%mover_abajo:
+        inc byte[%1]
+        jmp .termina
+    %%mover_arriba:
+        inc byte[%2]
+        jmp .termina
+    %%mover_derecha:
+        inc byte[%3]
+        jmp .termina
+    %%mover_izquierda:
+        inc byte[%4]
+        jmp .termina
+%endmacro
 section .text
 procesar_input:
     imprimir_mensaje msg_menu ; Muestro el menu de comandos
@@ -731,11 +755,11 @@ mover_oficial:
     jmp .termina ; Nunca deberia llegar aca
 
     .actualizar_movimientos_primer_oficial:
-        inc byte[primer_oficial_movimientos]
+        actualizar_estadisticas_movimiento primer_oficial_movs_abajo, primer_oficial_movs_arriba, primer_oficial_movs_derecha, primer_oficial_movs_izquierda
         jmp .termina
 
     .actualizar_movimientos_segundo_oficial:
-        inc byte[segundo_oficial_movimientos]
+        actualizar_estadisticas_movimiento segundo_oficial_movs_abajo, segundo_oficial_movs_arriba, segundo_oficial_movs_derecha, segundo_oficial_movs_izquierda
         jmp .termina
 
     .termina:

@@ -32,11 +32,8 @@ section     .data
     msg_esta_seguro_guardar      db "¿Esta seguro que desea guardar la partida actual? Perdera cualquier partida guardada anteriormente (S/N): ",10,0
     msg_recuperar_partida db "Ha recuperado la partida correctamente",10,0
     msg_esta_seguro_recuperar     db "¿Esta seguro que desea recuperar la partida guardada? Perdera la partida actual (S/N): ",10,0
-    msg_estadisticas              db "Estadisticas de la partida",10,0
-    msg_estadisticas_oficial1     db "Estadisticas del primer oficial: ",10,0
-    msg_estadisticas_oficial2     db "Estadisticas del segundo oficial: ",10,0
-    msg_cantidad_capturas         db "Cantidad de soldados capturados: ",0
-    msg_cantidad_movimientos      db "Cantidad de movimientos realizados: ",0
+    msg_estadisticas_oficial1     db "Primer oficial: ",0
+    msg_estadisticas_oficial2     db "Segundo oficial: ",0
     msg_final_partida    db "La partida ha finalizado, nos vemos en el siguiente Asalto",10,0
     msg_soldados_ganan db 0x1B, "[31m", "¡Victoria aplastante de los soldados! La fortaleza ha caído.", 0x1B, "[0m", 10, 0
     msg_oficiales_ganan db 0x1B, "[32m", "¡Triunfo estratégico de los oficiales! Los soldados se han rendido.", 0x1B, "[0m", 10, 0
@@ -51,4 +48,7 @@ section     .data
                     db "Z: Mover en diagonal hacia abajo e izquierda", 10
                     db "C: Mover en diagonal hacia abajo y derecha", 10, 0
     msg_tablero_actual db "TABLERO ACTUAL:", 10, 0
-    
+    header_movimientos db "ARRIBA | ABAJO | DERECHA | IZQUIERDA", 0
+
+    msg_estadisticas_capturas db "ESTADÍSTICAS DE CAPTURA POR OFICIAL: ",10, 0
+    msg_estadisticas_movimientos db "ESTADÍSTICAS DE MOVIMIENTOS POR OFICIAL: ",10, 0
