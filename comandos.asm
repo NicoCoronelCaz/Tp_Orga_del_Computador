@@ -445,28 +445,29 @@ section     .bss
 
     %%mover_abajo:
         inc byte[%1]
-        jmp .termina
+        jmp %%fin
     %%mover_arriba:
         inc byte[%2]
-        jmp .termina
+        jmp %%fin
     %%mover_derecha:
         inc byte[%3]
-        jmp .termina
+        jmp %%fin
     %%mover_izquierda:
         inc byte[%4]
-        jmp .termina
+        jmp %%fin
     %%mover_abajo_izquierda:
         inc byte[%5]
-        jmp .termina
+        jmp %%fin
     %%mover_abajo_derecha:
         inc byte[%6]
-        jmp .termina
+        jmp %%fin
     %%mover_arriba_izquierda:
         inc byte[%7]
-        jmp .termina
+        jmp %%fin
     %%mover_arriba_derecha:
         inc byte[%8]
-        jmp .termina
+        jmp %%fin
+    %%fin:
 %endmacro
 section .text
 procesar_input:
@@ -715,17 +716,11 @@ mover_oficial:
         jmp .continua ; Nunca deberia llegar aca
 
         .actualizar_primer_oficial:
-            mov al, [posicion_final]
-            mov [primer_oficial_posicion], al
-
             inc byte[primer_oficial_capturas]
 
             jmp .continua
 
         .actualizar_segundo_oficial:
-            mov al, [posicion_final]
-            mov [segundo_oficial_posicion], al
-
             inc byte[segundo_oficial_capturas]
 
             jmp .continua
@@ -776,10 +771,14 @@ mover_oficial:
 
     .actualizar_movimientos_primer_oficial:
         actualizar_estadisticas_movimiento primer_oficial_movs_abajo, primer_oficial_movs_arriba, primer_oficial_movs_derecha, primer_oficial_movs_izquierda, primer_oficial_movs_abajo_izq, primer_oficial_movs_abajo_der, primer_oficial_movs_arriba_izq, primer_oficial_movs_arriba_der
+        mov al, [posicion_final]
+        mov [primer_oficial_posicion], al
         jmp .termina
 
     .actualizar_movimientos_segundo_oficial:
         actualizar_estadisticas_movimiento segundo_oficial_movs_abajo, segundo_oficial_movs_arriba, segundo_oficial_movs_derecha, segundo_oficial_movs_izquierda, segundo_oficial_movs_abajo_izq, segundo_oficial_movs_abajo_der, segundo_oficial_movs_arriba_izq, segundo_oficial_movs_arriba_der
+        mov al, [posicion_final]
+        mov [segundo_oficial_posicion], al
         jmp .termina
 
     .termina:
