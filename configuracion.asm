@@ -41,6 +41,7 @@ configuracion_personalizada:
     je establecer_orientacion
     cmp al, '4'
     je salir_configuracion
+    jmp configuracion_personalizada
 
 establecer_simbolos:
     .pedir_soldado:
