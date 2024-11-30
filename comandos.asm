@@ -426,21 +426,21 @@ section     .bss
 
 %macro actualizar_estadisticas_movimiento 8
     mov al, [input]
-    cmp al, [movimiento_abajo]
+    cmp al, 'S'
     je %%mover_abajo
-    cmp al, [movimiento_arriba]
+    cmp al, 'W'
     je %%mover_arriba
-    cmp al, [movimiento_derecha]
+    cmp al, 'D'
     je %%mover_derecha
-    cmp al, [movimiento_izquierda]
+    cmp al, 'A'
     je %%mover_izquierda
-    cmp al, [movimiento_abajo_izquierda]
+    cmp al, 'Z'
     je %%mover_abajo_izquierda
-    cmp al, [movimiento_abajo_derecha]
+    cmp al, 'C'
     je %%mover_abajo_derecha
-    cmp al, [movimiento_arriba_izquierda]
+    cmp al, 'Q'
     je %%mover_arriba_izquierda
-    cmp al, [movimiento_arriba_derecha]
+    cmp al, 'E'
     je %%mover_arriba_derecha
 
     %%mover_abajo:

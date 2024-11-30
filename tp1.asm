@@ -36,7 +36,9 @@ loop_juego:
     ret
 
 fin_del_juego:
+    sub rsp,8
     call mostrar_estadisticas
+    add rsp,8
     imprimir_mensaje msg_final_partida
 
     ; Finaliza el programa
