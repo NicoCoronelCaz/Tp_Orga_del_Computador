@@ -1,12 +1,12 @@
 section .data
-	formatoCaptura 	    db ` %i \n\n`,0
+	formatoCaptura 	    db ` %hhi \n\n`,0
 	tituloMovimientos1  db ` ARRIBA-IZQ  |   ARRIBA  | ARRIBA-DER `,0
 	formatoMovimientos1 db `     %hhi       |     %hhi     |      %hhi     \n`,0
 	tituloMovimientos2  db `  IZQUIERDA  |           |   DERECHA  `,0
 	formatoMovimientos2 db `     %hhi       |           |      %hhi     \n`,0
 	tituloMovimientos3  db ` ABAJO-IZQ   |   ABAJO   |  ABAJO-DER `,0
 	formatoMovimientos3 db `     %hhi       |     %hhi     |      %hhi     \n`,0
-	separador	    db `--------------------------------------`,0
+	separador	    	db `--------------------------------------`,0
 	separadorFinal	    db `--------------------------------------\n`,0
 
 section .bss
@@ -20,12 +20,12 @@ mostrar_estadisticas:
 	imprimir_mensaje msg_estadisticas_oficial1
 	xor eax, eax
 	mov rdi, formatoCaptura
-	movzx esi, byte[primer_oficial_capturas]
+	mov rsi, [primer_oficial_capturas]
 	mPrintf
 	imprimir_mensaje msg_estadisticas_oficial2
 	xor eax, eax
 	mov rdi, formatoCaptura
-	movzx esi, byte[segundo_oficial_capturas]
+	mov rsi, [segundo_oficial_capturas]
 	mPrintf
 
 	; IMPRIMO MOVIMIENTOS OFICIAL 1
